@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="hi-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<title>Khoj</title>
+<meta name="description" content="Curiosity ka khel: asli facts, asli business cases, aur tumhara apna data.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Khoj">
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161412" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,650&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ee;--surface:#fffdf9;--ink:#1f1c18;--mute:#6b645b;--line:#e4ded4;
+  --acc:#a63f16;--acc-ink:#ffffff;--acc-soft:#f8e7dd;
+  --good:#256b42;--good-soft:#e2f1e7;--bad:#b23a2c;--bad-soft:#f7e1dd;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;--body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --nav:64px;--sb:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161412;--surface:#1e1b18;--ink:#f0ebe3;--mute:#a59d92;--line:#2e2a25;--acc:#f08a54;--acc-ink:#1a0f08;--acc-soft:#3a2418;--good:#6cc893;--good-soft:#1c3326;--bad:#f08a7c;--bad-soft:#3a201c}}
+:root[data-theme="dark"]{--bg:#161412;--surface:#1e1b18;--ink:#f0ebe3;--mute:#a59d92;--line:#2e2a25;--acc:#f08a54;--acc-ink:#1a0f08;--acc-soft:#3a2418;--good:#6cc893;--good-soft:#1c3326;--bad:#f08a7c;--bad-soft:#3a201c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-text-size-adjust:100%;overflow-x:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:10px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* top */
+.top{position:sticky;top:0;z-index:6;background:var(--bg);padding:calc(8px + env(safe-area-inset-top,0px)) 16px 0}
+.top-in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:10px;height:44px}
+.mark{font-family:var(--display);font-weight:650;font-size:22px;letter-spacing:.2px;flex:1;background:none;border:0;padding:0;min-height:44px;text-align:left;cursor:pointer}
+.stat-pill{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-variant-numeric:tabular-nums;position:relative;min-height:44px;padding:0 4px}
+.coin{width:16px;height:16px;border-radius:50%;background:var(--acc);display:inline-block;position:relative}
+.coin::after{content:"";position:absolute;inset:4px;border-radius:50%;border:1.5px solid var(--acc-ink);opacity:.7}
+.xpline{max-width:560px;margin:0 auto;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.xpline i{display:block;height:100%;background:var(--acc);transform-origin:left;transition:transform .6s ease}
+.float{position:absolute;right:0;top:-2px;font-size:13px;font-weight:700;color:var(--acc);pointer-events:none;animation:floatUp .9s ease forwards}
+@keyframes floatUp{from{opacity:0;transform:translateY(6px)}20%{opacity:1}to{opacity:0;transform:translateY(-18px)}}
+.flip1{animation:coinFlip .45s ease}
+@keyframes coinFlip{50%{transform:scaleX(.1)}}
+/* layout */
+main{max-width:560px;margin:0 auto;padding:12px 16px calc(var(--nav) + var(--sb) + 140px)}
+body.typing .nav{display:none}
+body.typing main{padding-bottom:110px}
+h1,h2,.display{font-family:var(--display);font-weight:650;letter-spacing:-.2px}
+h1{font-size:28px;line-height:1.2;margin:8px 0 6px}
+h2{font-size:21px;line-height:1.25;margin:22px 0 8px}
+p{margin:0 0 10px}
+.mute{color:var(--mute)}.small{font-size:14px}
+.label{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 6px}
+.hint{font-size:14px;color:var(--mute);margin:10px 0 0}
+.hint.guide{color:var(--acc);font-weight:700}
+.err{color:var(--bad);font-size:14px;min-height:1.2em;margin-top:6px}
+hr{border:0;border-top:1px solid var(--line);margin:20px 0}
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;border:0;border-radius:16px;background:var(--acc);color:var(--acc-ink);font-weight:700;font-size:17px;padding:12px 18px;cursor:pointer;transition:transform .12s ease}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{min-height:44px;font-size:15px;border-radius:12px;width:auto;padding:8px 14px}
+.link{background:none;border:0;color:var(--mute);font-weight:700;min-height:44px;padding:8px 6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.link.acc{color:var(--acc)}
+.row{display:flex;gap:10px;align-items:center}.row>.btn{flex:1}
+/* dock: hamesha neeche, thumb ke paas */
+.dock{position:fixed;left:0;right:0;bottom:calc(var(--nav) + var(--sb));z-index:5;padding:10px 16px;background:linear-gradient(to top,var(--bg) 70%,transparent)}
+body.typing .dock{bottom:0}
+.dock-in{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:2px;align-items:center}
+.dock:empty{display:none}
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--sb)}
+.nav-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);height:var(--nav)}
+.nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:700;color:var(--mute);cursor:pointer;min-height:44px}
+.nav button.on{color:var(--acc)}
+/* home */
+.hero{min-height:52vh;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.play{font-family:var(--display);font-size:30px;min-height:120px;border-radius:28px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:8px 14px;min-height:44px;font-weight:700;font-size:14px;cursor:pointer;color:var(--ink);transition:transform .12s ease}
+.chip:active{transform:scale(.95)}
+.chip.on{border-color:var(--acc);color:var(--acc);background:var(--acc-soft)}
+.status{text-align:center;color:var(--mute);font-size:14px}
+/* round card */
+.rcard{perspective:1200px;margin:6px 0 14px}
+.rc-in{display:grid;transition:transform .4s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d;position:relative}
+.rc-in.flipped{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px 20px 18px;min-height:180px;position:relative}
+.face.back{transform:rotateY(180deg)}
+.face .obs{font-family:var(--display);font-weight:500;font-size:24px;line-height:1.3;margin:6px 0 0}
+.face .obs.sm{font-size:19px}
+.rc-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.rc-head .sp{flex:1}
+.iconbtn{background:none;border:0;color:var(--mute);min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;margin:-12px -10px -12px 0}
+.glow::before{content:"";position:absolute;inset:-1px;border-radius:22px;box-shadow:0 0 0 3px var(--acc-soft),0 0 26px var(--acc-soft);opacity:0;animation:glow 1.6s ease .35s both;pointer-events:none}
+@keyframes glow{40%{opacity:1}to{opacity:.55}}
+.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1) .35s both}
+@keyframes pop{from{transform:rotateY(180deg) scale(.94)}to{transform:rotateY(180deg) scale(1)}}
+.step{animation:slideIn .28s ease both}
+@keyframes slideIn{from{opacity:0;transform:translateY(14px)}}
+.q{font-weight:700;font-size:18px;margin:0 0 12px}
+.dots{display:flex;gap:4px;margin:2px 0 10px}
+.dots i{height:3px;flex:1;border-radius:3px;background:var(--line)}
+.dots i.on{background:var(--acc)}
+/* options + chips */
+.opt{display:block;width:100%;text-align:left;min-height:54px;padding:13px 16px;margin-top:8px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-size:16px;line-height:1.35;transition:transform .12s ease}
+.opt:active{transform:scale(.98)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt .mk{float:right;font-size:12px;font-weight:700;margin-left:8px;color:var(--mute)}
+.opt.right .mk{color:var(--good)}.opt.wrong .mk{color:var(--bad)}
+.opt[disabled]{cursor:default}
+.chips5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.chips5 button{min-height:64px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;line-height:1.15;padding:6px 2px;cursor:pointer;transition:transform .12s ease}
+.chips5 button b{display:block;font-size:12px;color:var(--mute);font-weight:400;margin-top:3px}
+.chips5 button:active{transform:scale(.94)}
+.chips5 button.on{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+.starters{display:flex;gap:6px;margin:0 0 8px;flex-wrap:wrap}
+textarea,input[type=text],input[type=url],input[type=time],input[type=number],input[type=password],select{width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;font-size:16px}
+textarea{resize:vertical;min-height:88px}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--acc)}
+.field{margin-bottom:16px}
+.field>label{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+details{margin:8px 0}
+summary{cursor:pointer;color:var(--mute);font-weight:700;font-size:14px;min-height:44px;display:flex;align-items:center}
+details ul{margin:0 0 6px;padding-left:20px}
+.answer{font-size:18px;font-weight:700;margin-top:8px}
+.verdict{font-family:var(--display);font-size:24px;margin:2px 0 6px}
+.verdict.good{color:var(--good)}.verdict.bad{color:var(--acc)}
+.src{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;margin-top:12px;color:var(--mute)}
+.src a{color:var(--acc);font-weight:700;display:inline-flex;gap:4px;align-items:center;min-height:44px}
+.ai-box{margin-top:10px;padding:12px 0 0;border-top:1px dashed var(--line);font-size:15px}
+.ai-box .cost,.cost{font-size:12px;color:var(--mute);margin-top:4px}
+.dots3{display:inline-flex;gap:4px;padding:10px 0}
+.dots3 i{width:7px;height:7px;border-radius:50%;background:var(--mute);animation:d3 1s infinite ease-in-out}
+.dots3 i:nth-child(2){animation-delay:.15s}.dots3 i:nth-child(3){animation-delay:.3s}
+@keyframes d3{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+/* lists */
+.item{padding:14px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.meta{font-size:13px;color:var(--mute)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--line);color:var(--mute)}
+.tag.g{background:var(--good-soft);color:var(--good)}.tag.b{background:var(--bad-soft);color:var(--bad)}.tag.a{background:var(--acc-soft);color:var(--acc)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.tabs button{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:8px 14px;min-height:44px;cursor:pointer;font-size:14px;font-weight:700;color:var(--ink)}
+.tabs button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.big-num{font-family:var(--display);font-size:56px;line-height:1;font-weight:650;font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;margin:10px 0}
+.kv .n{font-family:var(--display);font-size:26px;font-weight:650;font-variant-numeric:tabular-nums}
+.kv .t{font-size:13px;color:var(--mute)}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:8px;transform-origin:left}
+.bar.thin{height:4px}
+.hbar{margin:8px 0}
+.hbar .lb{display:flex;justify-content:space-between;font-size:14px;gap:8px}
+.hbar .lb span:last-child{color:var(--mute);white-space:nowrap}
+.hbar .tr{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:4px}
+.hbar .tr i{display:block;height:100%;background:var(--mute);opacity:.45;border-radius:6px}
+.hbar.hi .tr i{background:var(--acc);opacity:1}
+.menu{display:flex;flex-direction:column}
+.menu button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;background:none;border:0;border-top:1px solid var(--line);font-weight:700;font-size:16px;cursor:pointer;text-align:left;padding:0 2px}
+.menu button small{font-weight:400;color:var(--mute);font-size:13px}
+.badges{display:grid;grid-template-columns:1fr 1fr;gap:18px 12px;margin-top:12px}
+.badge{text-align:center}
+.badge .ic{width:52px;height:52px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;border:1.5px dashed var(--line);color:var(--mute)}
+.badge.on .ic{background:var(--acc);border:0;color:var(--acc-ink)}
+.badge b{display:block;font-size:15px}
+.badge small{display:block;color:var(--mute);font-size:12px}
+svg.chart{display:block;width:100%;height:auto}
+svg.chart text{fill:var(--mute);font-size:11px;font-family:var(--body)}
+.legend{display:flex;gap:12px;font-size:13px;color:var(--mute);margin-top:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.stepper{display:flex;align-items:center;gap:12px;margin-top:4px}
+.stepper button{width:52px;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);font-size:24px;font-weight:700;cursor:pointer}
+.stepper output{font-family:var(--display);font-size:32px;min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
+.likert{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
+.likert button{min-height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700}
+.likert button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
+.switch input{width:24px;height:24px;accent-color:var(--acc)}
+.empty{color:var(--mute);padding:18px 0}
+.note{font-size:14px;color:var(--acc);margin-top:8px}
+.summary .big-num{font-size:64px;color:var(--acc)}
+/* overlay, toast, confetti */
+#toasts{position:fixed;left:0;right:0;top:calc(60px + env(safe-area-inset-top,0px));z-index:20;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:700;max-width:420px;animation:tin .25s ease}
+@keyframes tin{from{opacity:0;transform:translateY(-8px)}}
+#ov{position:fixed;inset:0;z-index:30;background:rgba(10,8,6,.5);display:none;align-items:center;justify-content:center;padding:16px}
+#ov.on{display:flex}
+.ovc{background:var(--surface);border-radius:26px;padding:28px 22px 22px;text-align:center;max-width:360px;width:100%;animation:ovIn .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes ovIn{from{transform:scale(.7);opacity:0}}
+.ovc .ring{width:88px;height:88px;border-radius:50%;margin:0 auto 12px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;font-family:var(--display);font-size:38px;font-weight:650}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:31;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;opacity:0;animation:fall 1.4s cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes fall{0%{opacity:1;transform:translate3d(0,0,0) rotate(0)}100%{opacity:0;transform:translate3d(var(--dx),92vh,0) rotate(var(--r))}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rc-in.flipped{transform:none}.face.back{transform:none}.rc-in.flipped .face.front{visibility:hidden}.rc-in:not(.flipped) .face.back{visibility:hidden}
+  .confetti{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <button class="mark" id="tHome" aria-label="Khoj, ghar">Khoj</button>
+    <span class="stat-pill" id="tStreak" title="Streak"></span>
+    <span class="stat-pill" id="tCoins" title="Coins" aria-live="polite"><i class="coin" aria-hidden="true"></i><span>0</span></span>
+  </div>
+  <div class="xpline" aria-hidden="true"><i id="tXp" style="transform:scaleX(0)"></i></div>
+</header>
+<main id="app"><p class="mute">Load ho raha hai...</p></main>
+<div class="dock" id="dock"></div>
+<nav class="nav" aria-label="Main"><div class="nav-in">
+  <button data-tab="khelo" id="nKhelo"></button>
+  <button data-tab="mera" id="nMera"></button>
+  <button data-tab="bahar" id="nBahar"></button>
+</div></nav>
+<div id="toasts" aria-live="polite"></div>
+<div id="ov" role="dialog" aria-modal="true"></div>
+
+<script>
+/* ================= CONFIG =================
+   WORKER_URL yahan daal do to har device pe Settings mein daalna nahi padega. */
+const CONFIG={WORKER_URL:'https://khoj-ai.riff-worker.workers.dev',USD_TO_INR:88};
+
+/* ================= ICONS (line, inline SVG) ================= */
+const IC={
+ play:'<path d="M7 4.5v15l12-7.5z"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+ compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/>',
+ flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+ flame:'<path d="M12 21c4 0 6.5-2.6 6.5-6.3 0-3.8-3-6.2-4.3-9.7-.4 2.4-1.6 3.8-3 4.6.2-2-1-4-2.7-5.6C8.4 8 5.5 10 5.5 14.7 5.5 18.4 8 21 12 21z"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',check:'<path d="M5 12.5l4.5 4.5L19 7"/>',lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ chev:'<path d="M9 5l7 7-7 7"/>',sparkle:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>'};
+const icon=(n,cls='')=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+
+/* ================= STATE ================= */
+const LS='khoj_v2';
+const LV=[['Andaazebaaz',0],['Sawaali',100],['Khojii',300],['Jaasoos',600],['Vaigyanik',1000],['Khoj Guru',1500]];
+const BADGES=[
+ ['pehla','Pehla Sawal','Pehla khud ka sawal likha'],['kyun10','Kyun Ka Raja','10 "kyun/kaise" sawal likhe'],
+ ['galat5','Galat Aur Khush','5 galat guesses ke baad answer khole'],['doosra','Doosra Socha','Pehla guess galat, doosra sahi nikla'],
+ ['chain3','Chain Reaction','Ek hi topic pe 3 chain round'],['zameen','Zameen Pe','3 Asli Duniya checks poore kiye'],
+ ['imaan','Imaandaar Yakeen','10+ guesses ke baad calibration 80 se upar'],['khula','Khula Dimaag','Khule Sawal mein 5 sawal, unme se 2 baad mein khole'],
+ ['data10','Data Jaasoos','10 data observations data se check kiye'],['theek5','Galat Tha Theek Kiya','5 baar data ne galat dikhaya aur naya guess banaya'],
+ ['case20','Case Study Collector','20 business cards khole'],['bahar4','Bahar Bhi Khoji','Bahar ki Khoj mein 4 alag hafton mein entries']];
+const CAT={khaana:'Khaana',business:'Business',science:'Science',itihaas:'Itihaas',jaanwar:'Jaanwar',roz:'Roz ki zindagi',india:'India',
+  pricing:'Pricing',packaging:'Packaging',pivot:'Pivot',distribution:'Distribution',crisis:'Crisis',regulation:'Regulation','local adaptation':'Local adaptation',ownership:'Ownership',branding:'Branding'};
+const MODES=[[1,'Khoj Yatra'],[3,'Business'],[2,'Asli Duniya'],[4,'Mera Business']];
+function fresh(){return{coins:5,xp:0,level:0,streak:0,lastDay:null,seen:{1:[],3:[]},rounds:[],guesses:[],khule:[],pending:[],checked:[],myQs:[],bizSaved:[],badges:{},
+  st:{ownQ:0,kyunQ:0,wrongOpen:0,chain:{},checks:0,khuleTotal:0,khuleOpened:0,doosraSahi:0,dataChecks:0,dataWrongNew:0,bizCards:0},
+  done:0,lastTestAt:0,testQ:[],cur:null,test:null,m4:{map:null,file:null,rows:0,obsDone:[],cur:null},
+  bahar:{entries:{},start:null,breakStart:null,breakEnd:null,cei:[]},
+  reported:[],extraCards:{approved:[],removed:[]},spend:[],lastMode:1,guided:true,updatedAt:null,
+  settings:{workerUrl:'',accessCode:'',codeAsked:false,reminder:false,reminderTime:'20:00',theme:'auto',haptics:true,sound:false,usdToInr:CONFIG.USD_TO_INR,syncOn:false,syncId:''},nid:1}}
+let S=null;
+try{S=JSON.parse(localStorage.getItem(LS))}catch(e){S=null}
+function merge(d,s){for(const k in d){if(s&&k in s){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k])&&s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k]))d[k]=merge(d[k],s[k]);else d[k]=s[k]}}if(s)for(const k in s)if(!(k in d))d[k]=s[k];return d}
+S=(S&&typeof S==='object')?merge(fresh(),S):fresh();
+if(S.done>0&&S.guided===true&&S.rounds.length)S.guided=false;
+let syncT=null;
+function save(){S.updatedAt=new Date().toISOString();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(S.settings.syncOn){clearTimeout(syncT);syncT=setTimeout(()=>syncUp(true),5000)}}
+
+const IDB={db:null,
+  open(){if(this.db)return Promise.resolve(this.db);return new Promise((res,rej)=>{try{const r=indexedDB.open('khoj',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(this.db=r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})},
+  async get(k){try{const db=await this.open();return await new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}catch(e){return null}},
+  async set(k,v){try{const db=await this.open();return await new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res(true);t.onerror=()=>rej(t.error)})}catch(e){return false}},
+  async clear(){try{const db=await this.open();return await new Promise(res=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').clear();t.oncomplete=()=>res(true);t.onerror=()=>res(false)})}catch(e){return false}}};
+
+/* ================= HELPERS ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function dayStr(t){const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const today=()=>dayStr(Date.now());
+const addDays=(ds,n)=>dayStr(new Date(ds+'T12:00:00').getTime()+n*864e5);
+const diffDays=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DIN=['Ravivaar','Somvaar','Mangalvaar','Budhvaar','Guruvaar','Shukravaar','Shanivaar'];
+function nice(ds){if(!ds)return'';const [y,m,d]=ds.split('-');return +d+' '+MON[+m-1]}
+function niceY(ds){if(!ds)return'';const [y,m,d]=ds.split('-');return +d+' '+MON[+m-1]+' '+y}
+function daysAgo(ds){const n=diffDays(ds,today());return n<=0?'aaj':n===1?'kal':n+' din pehle'}
+function levelOf(x){let l=0;LV.forEach((v,i)=>{if(x>=v[1])l=i});return l}
+function streakNow(){if(!S.lastDay)return 0;return(S.lastDay===today()||S.lastDay===addDays(today(),-1))?S.streak:0}
+function tick(){const t=today();if(S.lastDay===t)return;S.streak=S.lastDay===addDays(t,-1)?S.streak+1:1;S.lastDay=t}
+function calib(kind){const g=S.guesses.filter(x=>!kind||x.k===kind);if(!g.length)return null;let b=0;g.forEach(x=>{const p=x.c/100,o=x.ok?1:0;b+=(p-o)*(p-o)});return Math.round(100*(1-b/g.length))}
+function overconf(kind){const hi=S.guesses.filter(x=>x.c>=70&&(!kind||x.k===kind));if(hi.length<3)return false;const acc=hi.filter(x=>x.ok).length/hi.length;const avg=hi.reduce((s,x)=>s+x.c,0)/hi.length/100;return acc<avg-0.2}
+function isKyun(t){return /^(kyun|kyon|kyu|kyoon|kaise|kaisa|kese|why|how|kya hota agar)\b/i.test(t.trim())&&t.trim().split(/\s+/).length>=4}
+const rupee=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const pct=n=>Math.round(n)+'%';
+const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ================= FEEL: haptics, sound, numbers, confetti ================= */
+function buzz(p){if(!S.settings.haptics)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+let AC=null;
+function tone(kind){if(!S.settings.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+  if(kind==='ding'){o.type='sine';o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(1320,t+.08);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.6)}
+  else{o.type='triangle';o.frequency.setValueAtTime(1800,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+.08)}
+  o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.7)}catch(e){}}
+function countTo(el,to,ms=600,fmt=v=>String(Math.round(v))){if(!el)return;const from=+el.dataset.v||0;el.dataset.v=to;if(reduce()||from===to){el.textContent=fmt(to);return}
+  const t0=performance.now();const f=t=>{if(el.dataset.v!=String(to))return;const k=Math.min(1,(t-t0)/ms),e=1-Math.pow(1-k,3);el.textContent=fmt(from+(to-from)*e);if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f);
+  setTimeout(()=>{if(el.dataset.v==String(to))el.textContent=fmt(to)},ms+80)}
+function confetti(){if(reduce())return;const box=document.createElement('div');box.className='confetti';const cols=['var(--acc)','var(--good)','var(--ink)','var(--acc-soft)'];
+  for(let i=0;i<46;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'%';p.style.background=cols[i%4];p.style.setProperty('--dx',(Math.random()*160-80)+'px');p.style.setProperty('--r',(Math.random()*720-360)+'deg');p.style.animationDelay=(Math.random()*.25)+'s';box.appendChild(p)}
+  document.body.appendChild(box);setTimeout(()=>box.remove(),1900)}
+function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;const box=$('toasts');box.appendChild(el);while(box.children.length>2)box.firstChild.remove();setTimeout(()=>el.remove(),2400)}
+function floatAt(el,txt){if(!el||reduce())return;const f=document.createElement('span');f.className='float';f.textContent=txt;el.appendChild(f);setTimeout(()=>f.remove(),950)}
+
+/* ================= REWARDS ================= */
+let ROUNDLOG=null; // is round ka XP/coin/AI hisaab (summary card ke liye)
+function gain(c,x,why){
+  if(c){S.coins=Math.max(0,S.coins+c);const el=$('tCoins');if(c<0){el.classList.remove('flip1');void el.offsetWidth;el.classList.add('flip1');floatAt(el,String(c))}else floatAt(el,'+'+c);tone('tick')}
+  if(x)S.xp+=x;
+  if(ROUNDLOG&&(screen==='yatra'||screen==='biz')){ROUNDLOG.xp+=x||0;ROUNDLOG.coins+=c||0;if(x)ROUNDLOG.items.push([why,x])}
+  else if(x&&why)toast('+'+x+' XP · '+why);
+  const nl=levelOf(S.xp);if(nl>S.level){S.level=nl;levelUp(nl)}
+  checkBadges();save();topbar();
+}
+function baharWeeks(){const B=S.bahar;if(!B.start)return 0;return new Set(Object.keys(B.entries).map(d=>Math.floor(diffDays(B.start,d)/7))).size}
+function checkBadges(){const s=S.st,cb=calib();
+  const ok={pehla:s.ownQ>=1,kyun10:s.kyunQ>=10,galat5:s.wrongOpen>=5,doosra:s.doosraSahi>=1,chain3:Object.values(s.chain).some(v=>v>=3),zameen:s.checks>=3,
+    imaan:S.guesses.length>=10&&cb!==null&&cb>80,khula:s.khuleTotal>=5&&s.khuleOpened>=2,data10:s.dataChecks>=10,theek5:s.dataWrongNew>=5,case20:s.bizCards>=20,bahar4:baharWeeks()>=4};
+  BADGES.forEach(([id,n])=>{if(ok[id]&&!S.badges[id]){S.badges[id]=today();moment('badge',n)}});save()}
+let MQ=[];
+function moment(kind,name){MQ.push([kind,name]);if(MQ.length===1)showMoment()}
+function showMoment(){const m=MQ[0];if(!m)return;const ov=$('ov');const [kind,name]=m;
+  const lv=kind==='level'?name:null,nx=lv!=null?LV[lv+1]:null;
+  ov.innerHTML=kind==='level'?`<div class="ovc"><div class="ring">${lv+1}</div><div class="label">Level up</div><h2 style="margin:0 0 6px">${LV[lv][0]}</h2><p class="mute small">${nx?'Agla: '+nx[0]+' · '+nx[1]+' XP':'Sabse ooncha level.'}</p><button class="btn" id="ovOk">Aage</button></div>`
+   :`<div class="ovc"><div class="ring">${icon('sparkle')}</div><div class="label">Naya badge</div><h2 style="margin:0 0 6px">${esc(name)}</h2><p class="mute small">Mera tab mein dekh sakte ho.</p><button class="btn" id="ovOk">Aage</button></div>`;
+  ov.classList.add('on');confetti();buzz([20,40,20]);
+  const close=()=>{ov.classList.remove('on');MQ.shift();if(MQ.length)setTimeout(showMoment,200)};$('ovOk').onclick=close;ov.onclick=e=>{if(e.target===ov)close()}}
+function levelUp(l){moment('level',l)}
+function topbar(){
+  const l=levelOf(S.xp),cur=LV[l][1],nx=LV[l+1];
+  $('tXp').style.transform=`scaleX(${nx?Math.min(1,(S.xp-cur)/(nx[1]-cur)):1})`;
+  countTo($('tCoins').querySelector('span'),S.coins,500);
+  const st=$('tStreak');if(!st.querySelector('span'))st.innerHTML=icon('flame')+'<span>0</span><span class="sr"> din streak</span>';countTo(st.querySelector('span'),streakNow(),500);
+}
+function applyTheme(){const r=document.documentElement;if(S.settings.theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',S.settings.theme)}
+function addMyQ(t,src,ref){S.myQs.push({id:S.nid++,t,src,ref,d:today(),res:null})}
+function setMyQ(ref,res){const q=S.myQs.slice().reverse().find(x=>x.ref===ref&&x.res==null);if(q)q.res=res}
+
+/* ================= AI (Worker) ================= */
+const AI={ok:null,budgetOut:false,budget:null};
+const workerUrl=()=>((S.settings.workerUrl||CONFIG.WORKER_URL||'').trim().replace(/\/+$/,''));
+const aiOn=()=>!!(workerUrl()&&S.settings.accessCode&&AI.ok!==false&&!AI.budgetOut&&navigator.onLine);
+const cut=s=>String(s||'').slice(0,500);
+const inr=usd=>usd*(+S.settings.usdToInr||88);
+const rs=usd=>{const v=inr(usd);return '₹'+(v===0?'0':v<0.01?v.toFixed(4):v<1?v.toFixed(3):v.toFixed(2))};
+let SESSION={usd:0,calls:0};
+async function wfetch(path,opt={},ms=8000){const u=workerUrl();if(!u)throw new Error('no url');const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
+  try{const r=await fetch(u+path,{...opt,signal:ctrl.signal,headers:{'content-type':'application/json','x-access-code':S.settings.accessCode||'',...(opt.headers||{})}});let j=null;try{j=await r.json()}catch(e){}return{status:r.status,j:j||{}}}finally{clearTimeout(t)}}
+async function ai(path,body,ctx){
+  if(!aiOn())return null;
+  if(ctx&&ctx.aiCalls>=3){toast('Is round mein AI ke 3 sawal ho gaye.');return null}
+  try{const {status,j}=await wfetch(path,{method:'POST',body:JSON.stringify(body)});
+    if(status===401){AI.ok=false;rerender();return null}
+    if(j.cost&&j.cost.usd!=null){S.spend.push({t:Date.now(),p:j.cost.provider||'claude',usd:j.cost.usd});SESSION.usd+=j.cost.usd;SESSION.calls++;if(ctx){ctx.aiCalls=(ctx.aiCalls||0)+1;ctx.aiUsd=(ctx.aiUsd||0)+j.cost.usd}save()}
+    if(j.reason==='budget'){AI.budgetOut=true;rerender();return null}
+    return j.ok?j:null}catch(e){return null}}
+async function aiPing(){if(!workerUrl()||!S.settings.accessCode||!navigator.onLine)return;try{const {status,j}=await wfetch('/budget',{},6000);
+  if(status===401){AI.ok=false;return}if(status===200&&j.ok){AI.ok=true;AI.budget=j;AI.budgetOut=j.claude.can_call===false||j.claude.left<=0.00001}}catch(e){}}
+// AI button: sirf tap pe call. 8 sec mein jawab na aaye ya fail ho to box chupchaap hat jaata hai.
+function aiButton(label,holder,run){if(!aiOn())return '';const id='ai'+Math.random().toString(36).slice(2,8);
+  setTimeout(()=>{const b=$(id);if(!b)return;b.onclick=async()=>{const h=$(holder);if(!h)return;b.disabled=true;buzz(10);h.innerHTML='<div class="dots3" aria-label="Soch raha hai"><i></i><i></i><i></i></div>';
+    const html=await run();const h2=$(holder);if(!h2)return;
+    if(html){h2.innerHTML='<div class="ai-box">'+html+'</div>';h2.querySelectorAll('[data-fill]').forEach(x=>x.onclick=()=>{const t=$(x.dataset.fill);if(t){t.value=x.dataset.v;t.dispatchEvent(new Event('input'))}})}else{h2.innerHTML='';b.remove()}}},0);
+  return `<button class="link acc" id="${id}">${label}</button>`}
+const costLine=j=>j&&j.cost?`<div class="cost">Is jawab ka kharcha: ${rs(j.cost.usd)}</div>`:'';
+function aiFeedback(obsFn,qId,holder,ctx){return aiButton('Feedback lo (AI)',holder,async()=>{const q=($(qId)||{}).value||'';if(q.trim().length<5)return null;
+  const j=await ai('/feedback-sawal',{observation:cut(obsFn()),sawal:cut(q)},ctx);if(!j||!j.feedback)return null;
+  return `${esc(j.feedback)}${j.behtar_sawal?`<p style="margin:8px 0 0"><i>${esc(j.behtar_sawal)}</i></p><button class="link acc" data-fill="${qId}" data-v="${esc(j.behtar_sawal)}">Ye version use karo</button>`:''}${costLine(j)}`})}
+
+/* ================= ROUTER ================= */
+let CARDS=[],FACTS_ERR=false,screen='home';
+const TAB_OF={home:'khelo',yatra:'khelo',biz:'khelo',asli:'khelo',m4:'khelo',test:'khelo',khule:'khelo',summary:'khelo',mera:'mera',pattern:'mera',badges:'mera',kharcha:'mera',settings:'mera',bahar:'bahar',pending:'bahar'};
+function view(html,on,dock){const app=$('app');app.innerHTML=html;$('dock').innerHTML=dock?`<div class="dock-in">${dock}</div>`:'';window.scrollTo(0,0);
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{buzz(8);go(b.dataset.go)});
+  if(on)for(const k in on){const el=$(k);if(el)el.onclick=e=>{buzz(10);on[k](e)}}
+  const tab=TAB_OF[screen]||'khelo';document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));topbar()}
+function go(s){if(s==='home'&&screen!=='home'&&SESSION.calls){LASTSESSION={...SESSION};SESSION={usd:0,calls:0}}
+  screen=s;({home,yatra:()=>round(1),biz:()=>round(3),asli,khule,pending,pattern,badges,settings,test,m4,bahar,mera,kharcha}[s]||home)()}
+function rerender(){go(screen)}
+let LASTSESSION=null;
+$('tHome').onclick=()=>go('home');
+$('nKhelo').innerHTML=icon('play')+'Khelo';$('nMera').innerHTML=icon('user')+'Mera';$('nBahar').innerHTML=icon('compass')+'Bahar';
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{buzz(8);const t=b.dataset.tab;go(t==='khelo'?'home':t==='mera'?'mera':'bahar')});
+document.addEventListener('focusin',e=>{if(e.target.matches('textarea,input[type=text],input[type=url],input[type=password],input[type=number]')){document.body.classList.add('typing');setTimeout(()=>e.target.scrollIntoView({block:'center',behavior:reduce()?'auto':'smooth'}),250)}});
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.matches('textarea,input'))document.body.classList.remove('typing')},100));
+
+/* ================= KHELO (home) ================= */
+function playable(m){if(m===2||m===4)return true;return CARDS.some(c=>c.mode===m&&!S.seen[m].includes(c.id))}
+function home(){
+  const m=S.cur?S.cur.mode:(S.lastMode||1),mName=(MODES.find(x=>x[0]===m)||MODES[0])[1];
+  const pc=S.pending.length,kc=S.khule.filter(k=>card(k.cid)).length;
+  const aiLine=workerUrl()&&S.settings.accessCode&&AI.budgetOut?'<p class="status">Is mahine ka AI budget khatam. Game bina AI ke chalega.</p>':'';
+  const sess=LASTSESSION?`<p class="status">Pichhle session ka AI kharcha: ${rs(LASTSESSION.usd)} (${LASTSESSION.calls} sawal)</p>`:'';
+  const remind=S.settings.reminder&&!S.bahar.entries[today()]&&new Date().toTimeString().slice(0,5)>=S.settings.reminderTime?`<p class="status"><button class="link acc" data-go="bahar">Bahar ki Khoj: aaj ki entry baaki hai</button></p>`:'';
+  view(`<div class="hero">
+    <button class="btn play" id="play">${S.cur?'Jaari rakho':'Khelo'}</button>
+    <p class="status">${S.cur?'Chal raha round':esc(mName)} · ${S.coins} coins · ${streakNow()} din streak</p>
+    <div class="modes" role="group" aria-label="Mode chuno">${MODES.map(([k,n])=>`<button class="chip ${k===m?'on':''}" data-m="${k}" ${playable(k)?'':'disabled title="Saare cards ho gaye"'}>${n}</button>`).join('')}</div>
+    ${kc||pc?`<p class="status">${kc?`<button class="link" data-go="khule">Khule Sawal (${kc})</button>`:''}${pc?` <button class="link" data-go="pending">Pending Checks (${pc})</button>`:''}</p>`:''}
+    ${FACTS_ERR?'<p class="status">facts.json load nahi hua. Asli Duniya, Mera Business aur Bahar chal rahe hain.</p>':''}
+    ${aiLine}${sess}${remind}</div>`,{play:()=>startMode(S.cur?S.cur.mode:m)});
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{buzz(10);const k=+b.dataset.m;S.lastMode=k;save();startMode(k)});
+}
+function startMode(m){S.lastMode=m;save();go(m===1?'yatra':m===3?'biz':m===2?'asli':'m4')}
+
+/* ================= ROUND (Mode 1 + 3) ================= */
+const card=id=>CARDS.find(c=>c.id===id);
+const YK=[[10,'Bilkul nahi'],[30,'Thoda'],[50,'Aadha'],[75,'Kaafi'],[95,'Pakka']];
+const IK=[[1,'Bilkul nahi'],[3,'Thodi'],[4,'Theek'],[5,'Kaafi'],[7,'Bahut']];
+const chips5=(id,set,sel)=>`<div class="chips5" id="${id}" role="group">${set.map(([v,l])=>`<button data-v="${v}" class="${sel===v?'on':''}">${l}${set===YK?`<b>${v}%</b>`:''}</button>`).join('')}</div>`;
+function bindChips(id,fn){const g=$(id);if(!g)return;g.querySelectorAll('button').forEach(b=>b.onclick=()=>{buzz(12);g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fn(+b.dataset.v)})}
+const GUIDE={notice:'Pehle bas dekho. Kya ajeeb lag raha hai?',sawal:'Apna sawal likho. "Kyun" ya "Kaise" se shuru karo.',guess:'Answer se pehle andaaza. Galat hona bhi theek hai.',
+  yakeen:'Kitna sure ho? Imaandaar raho, yahi score banata hai.',doosra:'Pakka ho, phir bhi ek aur possibility socho.',ichha:'Answer jaanne ka mann kitna hai?',
+  decide:'Coin lagao ya sawal khula chhodo. Swipe right = chhodo.',reveal:'Swipe left = agla card.',gap:'Har answer ek naya sawal kholta hai.'};
+const guide=s=>S.guided&&GUIDE[s]?`<p class="hint guide">${GUIDE[s]}</p>`:'';
+function stepsFor(m){return m===3?['notice','sawal','guess','yakeen','doosra','ichha','decide','reveal','tbs','gap']:['notice','sawal','guess','yakeen','doosra','ichha','decide','reveal','gap']}
+function dots(m,step){const st=stepsFor(m),i=st.indexOf(step);return i<0?'':'<div class="dots" aria-hidden="true">'+st.map((s,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')+'</div>'}
+function nextCard(m){const un=CARDS.filter(c=>c.mode===m&&!S.seen[m].includes(c.id));return un.length?un[Math.floor(Math.random()*un.length)]:null}
+function testDue(){return S.done>0&&S.done%5===0&&S.lastTestAt!==S.done&&S.testQ.length>0}
+function finishRound(){tick();S.done++;save()}
+const FREE=['notice','reveal','tbs','gap','creveal','cfree2'];
+// Round khatam: chhota summary card (XP gin ke), phir agla.
+function agla(m){const R=S.cur;S.cur=null;if(S.guided&&R){S.guided=false}save();
+  const L=ROUNDLOG;ROUNDLOG=null;
+  if(L&&(L.xp||L.aiUsd||L.coins)){showSummary(L,m);return}
+  go(testDue()?'test':(m===3?'biz':'yatra'))}
+function showSummary(L,m){screen='summary';
+  view(`<div class="summary" style="padding-top:8vh;text-align:center"><div class="label">Is round mein</div><div class="big-num" id="sx" data-v="0">0</div><p class="mute">XP</p>
+    <p class="small">${L.coins>=0?'+':''}${L.coins} coin${L.aiUsd?` · Is round ka AI kharcha: ${rs(L.aiUsd)}`:''}</p>
+    <p class="small mute">${L.items.map(([w,x])=>esc(w)+' +'+x).join(' · ')}</p></div>`,
+    {ag:()=>go(testDue()?'test':(m===3?'biz':'yatra')),hm:()=>go('home')},`<button class="btn" id="ag">Agla card</button><button class="link" id="hm">Ghar</button>`);
+  countTo($('sx'),L.xp,800)}
+
+function round(m){
+  let R=S.cur;
+  if(R&&R.mode!==m&&!FREE.includes(R.step))return view(`<h1>Ek round chal raha hai</h1><p class="mute">Pehle use poora karo.</p>`,{g:()=>go(R.mode===3?'biz':'yatra')},`<button class="btn" id="g">Us round pe jao</button>`);
+  if(R&&R.mode!==m)R=S.cur=null;
+  if(!R){if(FACTS_ERR)return home();const c=nextCard(m);
+    if(!c)return view(`<h1>Saare cards dekh liye</h1><p class="mute">Khule Sawal mein chhode hue sawal hain, ya apni reality pe andaaza lagao.</p>`,{},`<button class="btn" data-go="asli">Asli Duniya</button><button class="link" data-go="khule">Khule Sawal</button>`);
+    R=S.cur={cid:c.id,mode:m,step:'notice',aiCalls:0,aiUsd:0};save()}
+  const c=card(R.cid);if(!c){S.cur=null;save();return home()}
+  if(!ROUNDLOG)ROUNDLOG={xp:0,coins:0,items:[],aiUsd:0};
+  Object.defineProperty(ROUNDLOG,'aiUsd',{get:()=>R.aiUsd||0,configurable:true});
+  const set=(k,v,step)=>{R[k]=v;if(step)R.step=step;save();round(m)};
+  const head=(extra='')=>`<div class="rc-head"><span>${m===3?'Business · ':''}${esc(CAT[c.category]||c.category)}${c.saal?' · '+c.saal:''}</span><span class="sp"></span>${extra}<button class="iconbtn" id="rp" aria-label="Ye galat lag raha hai" title="Ye galat lag raha hai">${icon('flag')}</button></div>`;
+  const front=(sm)=>`<div class="face front">${head()}<p class="obs ${sm?'sm':''}">${esc(c.observation)}</p></div>`;
+  const cardHtml=(sm,back,flip,cls='')=>`<div class="rcard" id="rcard"><div class="rc-in ${flip?'flipped':''}" id="rcin">${front(sm)}${back?`<div class="face back ${cls}">${back}</div>`:''}</div></div>`;
+  const D=s=>dots(m,s);
+  const fin=()=>{bindReport(c,m);bindSwipe(m)};
+  switch(R.step){
+  case 'notice':
+    view(D('notice')+cardHtml(false)+guide('notice'),{n:()=>set('step','sawal')},`<button class="btn" id="n">Ajeeb hai. Aage</button>`);return fin();
+  case 'sawal':
+    view(D('sawal')+cardHtml(true)+`<div class="step"><div class="starters">${['Kyun...','Kaise...','Kya hota agar...'].map(s=>`<button class="chip" data-st="${s.replace('...','')}">${s}</button>`).join('')}</div>
+      <label class="sr" for="qt">Tumhara sawal</label><textarea id="qt" placeholder="Apna sawal..." maxlength="300"></textarea><div class="err" id="qe"></div>
+      <details><summary>Example sawal</summary><ul>${(c.example_sawal||[]).map(e=>'<li>'+esc(e)+'</li>').join('')}</ul></details>
+      ${aiFeedback(()=>c.observation,'qt','aib',R)}<div id="aib"></div>${guide('sawal')}</div>`,
+      {ok:()=>{const t=$('qt').value.trim();if(t.length<8||t.split(/\s+/).length<3){$('qe').textContent='Thoda poora sawal likho (kam se kam 3 words).';return}
+        const k=isKyun(t);S.st.ownQ++;if(k)S.st.kyunQ++;R.own=t;R.qref='r'+S.nid;addMyQ(t,m===3?'m3':'m1',R.qref);R.step='guess';gain(1,k?15:10,k?'kyun/kaise sawal':'apna sawal');round(m)},
+       sk:()=>set('step','guess')},`<button class="btn" id="ok">Sawal pakka</button><button class="link" id="sk">Abhi sawal nahi</button>`);
+    document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{buzz(10);const t=$('qt');t.value=b.dataset.st+' ';t.focus();t.setSelectionRange(t.value.length,t.value.length)});return fin();
+  case 'guess':
+    view(D('guess')+cardHtml(true)+`<div class="step"><p class="q">${esc(c.question)}</p>${c.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}${guide('guess')}</div>`);
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{buzz(12);set('g1',+b.dataset.i,'yakeen')});return fin();
+  case 'yakeen':
+    view(D('yakeen')+cardHtml(true)+`<div class="step"><p class="small mute">Tumhara guess: <b>${esc(c.options[R.g1])}</b></p><p class="q">Kitna sure ho?</p>${chips5('yk',YK)}${guide('yakeen')}</div>`);
+    bindChips('yk',v=>{R.conf=v;R.step=v>70?'doosra':'ichha';gain(0,5,'guess + yakeen');setTimeout(()=>round(m),160)});return fin();
+  case 'doosra':
+    view(D('doosra')+cardHtml(true)+`<div class="step"><p class="q">Agar ye galat hai, to aur kya ho sakta hai?</p><p class="mute small">Pehla: ${esc(c.options[R.g1])} · ${R.conf}%</p>
+      ${c.options.map((o,i)=>i===R.g1?'':`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}${guide('doosra')}</div>`,{sk:()=>set('step','ichha')},`<button class="link" id="sk">Kuch aur nahi soojha</button>`);
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{buzz(12);R.g2=+b.dataset.i;R.step='ichha';gain(1,10,'doosra guess');round(m)});return fin();
+  case 'ichha':
+    view(D('ichha')+cardHtml(true)+`<div class="step"><p class="q">Answer jaanne ki kitni ichha hai?</p>${chips5('ik',IK)}${guide('ichha')}</div>`);
+    bindChips('ik',v=>setTimeout(()=>set('ichha',v,'decide'),160));return fin();
+  case 'decide':{
+    const can=S.coins>=1;
+    view(D('decide')+cardHtml(true)+`<div class="step"><p class="q">${esc(c.question)}</p><p class="small">Tumhara guess: <b>${esc(c.options[R.g1])}</b> · ${R.conf}%${R.g2!=null?'<br>Doosra: '+esc(c.options[R.g2]):''}</p>
+      ${can?'':'<p class="note">Coins khatam. Asli Duniya ya Mera Business ka check poora karne pe +2 coin milte hain.</p>'}${guide('decide')}</div>`,
+      {op:()=>openAnswer(R,c,m),ch:()=>chhodo(R,c,m)},`<button class="btn" id="op" ${can?'':'disabled'}>Answer kholo · 1 coin</button><button class="link" id="ch">Chhod do (Khule Sawal mein)</button>`);return fin();}
+  case 'reveal':{
+    const ok=R.ok,anim=R.anim;R.anim=false;
+    const back=`${head()}<div class="verdict ${ok?'good':'bad'}">${ok?'Sahi nikla.':R.g2===c.correct?'Pehla galat, doosra sahi.':'Galat nikla, ab ye yaad rahega.'}</div><p class="answer">${esc(c.options[c.correct])}</p>`;
+    view(D('reveal')+cardHtml(false,back,!anim,ok?'pop':'glow')+`<div class="step">
+      <p>${esc(c.explanation)}</p>
+      <details><summary>Saare options</summary>${c.options.map((o,i)=>{const cl=i===c.correct?'right':(i===R.g1||i===R.g2)?'wrong':'';const mk=[i===c.correct?'Sahi':'',i===R.g1?'Pehla guess':'',i===R.g2?'Doosra':''].filter(Boolean).join(' · ');return `<button class="opt ${cl}" disabled>${mk?`<span class="mk">${mk}</span>`:''}${esc(o)}</button>`}).join('')}</details>
+      ${srcHtml(c.source,c.source_url,c.saal)}${guide('reveal')}</div>`,{n:()=>set('step',m===3?'tbs':'gap')},`<button class="btn" id="n">Aage</button>`);
+    if(anim){setTimeout(()=>{const x=$('rcin');if(x)x.classList.add('flipped')},40);buzz(20);tone('ding')}
+    return fin();}
+  case 'tbs':
+    view(cardHtml(false,`${head()}<div class="label" style="margin-top:6px">Tumhare business mein</div><p class="obs sm">${esc(c.tumhare_business_sawal)}</p>`,true)+`<div class="step"><p class="mute small">Iska answer game nahi deta. Save karke Mera Business mein andaaza lagao aur check karo.</p></div>`,
+      {sv:()=>{if(!S.bizSaved.some(b=>b.cid===c.id))S.bizSaved.push({id:S.nid++,cid:c.id,q:c.tumhare_business_sawal,d:today()});save();toast('Mera Business mein save hua');set('step','gap')},n:()=>set('step','gap')},
+      `<button class="btn" id="sv" ${S.bizSaved.some(b=>b.cid===c.id)?'disabled':''}>Mera Business mein save karo</button><button class="link" id="n">Aage</button>`);return fin();
+  case 'gap':{
+    const can=S.coins>=1;
+    view(D('gap')+cardHtml(false,`${head()}<div class="label" style="margin-top:6px">Naya gap</div><p class="obs">${esc(c.followup_sawal)}</p>`,true)+guide('gap'),
+      {cn:()=>{if(S.coins<1)return;gain(-1,0,'chain round');set('step',c.followup_options?'cguess':'cfree')},ag:()=>agla(m)},
+      `<button class="btn" id="ag">Agla card</button><button class="link acc" id="cn" ${can?'':'disabled'}>Chain mein aage · 1 coin</button>`);return fin();}
+  case 'cguess':
+    view(cardHtml(false,`${head()}<div class="label" style="margin-top:6px">Chain</div><p class="obs sm">${esc(c.followup_sawal)}</p>`,true)+`<div class="step">${c.followup_options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>`);
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{buzz(12);set('cg',+b.dataset.i,'cyakeen')});return fin();
+  case 'cyakeen':
+    view(cardHtml(false,`${head()}<div class="label" style="margin-top:6px">Chain</div><p class="obs sm">${esc(c.followup_sawal)}</p>`,true)+`<div class="step"><p class="small mute">Guess: <b>${esc(c.followup_options[R.cg])}</b></p><p class="q">Kitna sure ho?</p>${chips5('yk',YK)}</div>`);
+    bindChips('yk',v=>{R.cconf=v;R.step='creveal';const ok=R.cg===c.followup_correct;R.cok=ok;S.guesses.push({c:v,ok,k:'duniya'});S.st.chain[c.category]=(S.st.chain[c.category]||0)+1;gain(0,20+(ok?5:0),ok?'chain + sahi':'chain round');buzz(20);tone('ding');setTimeout(()=>round(m),160)});return fin();
+  case 'creveal':
+    view(cardHtml(false,`${head()}<div class="verdict ${R.cok?'good':'bad'}">${R.cok?'Sahi nikla.':'Galat nikla, ab ye yaad rahega.'}</div><p class="answer">${esc(c.followup_options[c.followup_correct])}</p>`,true,R.cok?'':'glow')+
+      `<div class="step"><p>${esc(c.followup_answer)}</p>${srcHtml(c.followup_source,c.followup_source_url)}<p class="hint">${esc(CAT[c.category]||c.category)} mein chain rounds: ${S.st.chain[c.category]}</p></div>`,
+      {ag:()=>agla(m)},`<button class="btn" id="ag">Agla card</button>`);return fin();
+  case 'cfree':
+    view(cardHtml(false,`${head()}<div class="label" style="margin-top:6px">Chain</div><p class="obs sm">${esc(c.followup_sawal)}</p>`,true)+`<div class="step">
+      <label class="sr" for="cg">Tumhara andaaza</label><textarea id="cg" placeholder="Tumhara andaaza..." maxlength="200"></textarea><div class="err" id="ce"></div>
+      <p class="q" style="margin-top:8px">Kitna sure ho?</p>${chips5('yk',YK,50)}</div>`,
+      {ok:()=>{const t=$('cg').value.trim();if(t.length<2){$('ce').textContent='Pehle ek andaaza likho.';return}R.cg=t;R.cconf=R.cconf||50;R.step='cfree2';S.st.chain[c.category]=(S.st.chain[c.category]||0)+1;gain(0,20,'chain round');buzz(20);tone('ding');round(m)}},
+      `<button class="btn" id="ok">Answer dekho</button>`);
+    bindChips('yk',v=>R.cconf=v);return fin();
+  case 'cfree2':
+    view(cardHtml(false,`${head()}<div class="label" style="margin-top:6px">Answer</div><p class="answer">${esc(c.followup_answer)}</p>`,true)+`<div class="step">
+      <p class="small mute">Tumhara guess: ${esc(R.cg)} · ${R.cconf}%</p>${srcHtml(c.source,c.source_url)}
+      ${R.cmark?`<p class="hint">Mark kiya: ${esc(R.cmark)}</p>`:`<p class="q" style="margin-top:12px">Tumhara guess match hua?</p><div class="row"><button class="btn ghost" id="mh">Haan</button><button class="btn ghost" id="mn">Nahi</button></div><button class="link" id="mp">Keh nahi sakte</button>`}</div>`,
+      {mh:()=>{R.cmark='haan';S.guesses.push({c:R.cconf,ok:true,k:'duniya'});gain(0,5,'sahi guess');round(m)},mn:()=>{R.cmark='nahi';S.guesses.push({c:R.cconf,ok:false,k:'duniya'});save();round(m)},
+       mp:()=>{R.cmark='keh nahi sakte';save();round(m)},ag:()=>agla(m)},R.cmark?`<button class="btn" id="ag">Agla card</button>`:'');return fin();
+  }
+}
+function srcHtml(name,url,saal){if(!name&&!url)return '';return `<div class="src"><span>Source: ${esc(name||'')}${saal?' · '+saal:''}</span>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${icon('link')}Kholo</a>`:''}</div>`}
+function openAnswer(R,c,m){if(S.coins<1)return;S.rounds.push({cid:c.id,m,c:R.conf,ich:R.ichha,op:true,d:today()});S.seen[m].push(c.id);gain(-1,0,'answer khola');finishRound();R.step='reveal';R.anim=true;doReveal(R);round(m)}
+function chhodo(R,c,m){S.guided=false;S.rounds.push({cid:c.id,m,c:R.conf,ich:R.ichha,op:false,d:today()});S.seen[m].push(c.id);S.khule.push({cid:c.id,m,g1:R.g1,conf:R.conf,g2:R.g2,own:R.own||'',qref:R.qref,d:today()});S.st.khuleTotal++;finishRound();checkBadges();S.cur=null;save();
+  const L=ROUNDLOG;ROUNDLOG=null;
+  view(`<h1>Sawal khula hai</h1><p class="mute">Answer nahi dikhaya. Khule Sawal mein hai, jab chaho 1 coin se kholna.</p><p class="small">"${esc(R.own||c.question)}"</p>${L&&L.xp?`<p class="small mute">Is round mein +${L.xp} XP${R.aiUsd?' · AI kharcha '+rs(R.aiUsd):''}</p>`:''}`,
+    {ag:()=>go(testDue()?'test':(m===3?'biz':'yatra'))},`<button class="btn" id="ag">Agla card</button><button class="link" data-go="khule">Khule Sawal dekho</button>`)}
+const yDesc=v=>v<35?'Kam yakeen':v<=65?'Beech mein':'Kaafi pakka';
+function doReveal(R){if(R.revealed)return;const c=card(R.cid);const ok=R.g1===c.correct;R.ok=ok;R.revealed=true;
+  S.guesses.push({c:R.conf,ok,k:'duniya'});if(R.qref)setMyQ(R.qref,ok?'guess sahi':'guess galat');
+  if(c.mode===3)S.st.bizCards++;
+  if(ok)gain(0,5,'sahi guess');
+  else{S.st.wrongOpen++;if(!S.testQ.includes(c.id))S.testQ.push(c.id);if(R.g2===c.correct)S.st.doosraSahi++;gain(0,15,'galat ke baad khola')}
+  save()}
+// Swipe: left = agla (reveal ke baad), right = Khule Sawal mein (faisle wale step pe). Buttons bhi hain.
+function bindSwipe(m){const el=$('rcard');if(!el)return;let x0=null,y0=0;
+  el.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  el.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)<70||Math.abs(dy)>Math.abs(dx))return;
+    const R=S.cur;if(!R)return;const c=card(R.cid);
+    if(dx<0&&['reveal','tbs','gap','creveal'].includes(R.step)){buzz(12);agla(m)}
+    else if(dx>0&&R.step==='decide'){buzz(12);chhodo(R,c,m)}},{passive:true})}
+// "Ye galat lag raha hai": card chhup jaata hai, reported list mein.
+function bindReport(c,m){const b=$('rp');if(!b)return;b.onclick=()=>{buzz(10);
+  $('dock').innerHTML=`<div class="dock-in"><p class="small" style="margin:0 0 6px">Ye card galat lag raha hai? Ise chhupa ke report karein?</p><div class="row" style="width:100%"><button class="btn ghost" id="rn">Nahi</button><button class="btn" id="ry">Haan, chhupao</button></div></div>`;
+  $('rn').onclick=()=>round(m);
+  $('ry').onclick=()=>{reportCard(c.id);const R=S.cur;if(R&&R.cid===c.id){if(!S.seen[m].includes(c.id))S.seen[m].push(c.id);S.cur=null}ROUNDLOG=null;save();toast('Card chhupa diya. Shukriya.');go(m===3?'biz':'yatra')}}}
+function reportCard(id){if(!S.reported.some(r=>r.id===id))S.reported.push({id,d:today()});CARDS=CARDS.filter(c=>c.id!==id);save();
+  if(S.settings.syncOn&&aiOn())wfetch('/report',{method:'POST',body:JSON.stringify({id})}).catch(()=>{})}
+
+/* ================= YAAD TEST ================= */
+function test(){
+  if(!S.test){const pool=[...S.testQ].filter(card).sort(()=>Math.random()-.5).slice(0,3);if(!pool.length){S.cur=null;return go('yatra')}
+    S.testQ=S.testQ.filter(id=>!pool.includes(id));S.test={items:pool,i:0,ans:null,right:0};S.lastTestAt=S.done;save()}
+  const T=S.test;
+  if(T.i>=T.items.length){const r=T.right,n=T.items.length;S.test=null;save();
+    return view(`<div style="padding-top:6vh"><div class="label">Yaad Test</div><div class="big-num">${r}/${n}</div><p class="mute">yaad the. Ye wo sawal the jahan pehla guess galat gaya tha.</p></div>`,{ag:()=>{S.cur=null;go('yatra')}},`<button class="btn" id="ag">Aage khelo</button><button class="link" data-go="home">Ghar</button>`)}
+  const c=card(T.items[T.i]);
+  view(`<div class="label">Yaad Test · ${T.i+1}/${T.items.length}</div><div class="rcard"><div class="rc-in"><div class="face"><p class="obs sm">${esc(c.observation)}</p></div></div></div>
+    <p class="q">${esc(c.question)}</p>${c.options.map((o,i)=>{let cl='';if(T.ans!=null){if(i===c.correct)cl='right';else if(i===T.ans)cl='wrong'}return `<button class="opt ${cl}" data-i="${i}" ${T.ans!=null?'disabled':''}>${esc(o)}</button>`}).join('')}
+    ${T.ans!=null?`<p style="margin-top:12px"><b>${T.ans===c.correct?'Yaad tha.':'Abhi pakad mein nahi. Koi baat nahi.'}</b> ${esc(c.explanation)}</p>`:''}`,
+    {nx:()=>{T.i++;T.ans=null;save();test()}},T.ans!=null?`<button class="btn" id="nx">Aage</button>`:'');
+  if(T.ans==null)document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{buzz(12);T.ans=+b.dataset.i;if(T.ans===c.correct){T.right++;gain(0,10,'yaad tha')}save();test()});
+}
+
+/* ================= KHULE SAWAL ================= */
+function khule(){
+  const busy=S.cur&&!FREE.includes(S.cur.step);const list=S.khule.filter(k=>card(k.cid));
+  view(`<h1>Khule Sawal</h1>${list.length?'<p class="mute small">Answer abhi tak nahi dekha. Jo sach mein jaanna ho, 1 coin se kholo.</p>':'<p class="empty">Abhi koi khula sawal nahi. Round mein "Chhod do" karoge to yahan aayega.</p>'}
+    ${busy?'<p class="note">Pehle chal raha round poora karo.</p>':''}
+    ${list.map(k=>{const c=card(k.cid);return `<div class="item"><div class="meta">${nice(k.d)} · ${k.m===3?'Business':'Khoj Yatra'}</div>
+      <p class="display" style="font-size:19px;margin:4px 0 6px">${esc(c.observation)}</p>${k.own?`<p class="small">Tumhara sawal: "${esc(k.own)}"</p>`:''}
+      <p class="small mute">Guess: ${esc(c.options[k.g1])} · ${k.conf}%</p><button class="btn sm" data-k="${esc(k.cid)}" ${S.coins<1||busy?'disabled':''}>Kholo · 1 coin</button></div>`}).join('')}`,{},`<button class="btn ghost" data-go="home">Ghar</button>`);
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{if(S.coins<1||busy)return;const i=S.khule.findIndex(k=>k.cid===b.dataset.k);if(i<0)return;const k=S.khule.splice(i,1)[0];
+    S.st.khuleOpened++;S.cur={cid:k.cid,mode:k.m,step:'reveal',g1:k.g1,conf:k.conf,g2:k.g2,own:k.own,qref:k.qref,fromKhule:true,anim:true,aiCalls:0,aiUsd:0};
+    ROUNDLOG={xp:0,coins:0,items:[]};const rr=S.rounds.find(r=>r.cid===k.cid);if(rr)rr.later=true;gain(-1,0,'khula sawal khola');tick();doReveal(S.cur);go(k.m===3?'biz':'yatra')});
+}
+
+/* ================= ASLI DUNIYA ================= */
+let ASLI_CTX={aiCalls:0};
+function asli(){ASLI_CTX={aiCalls:0};let conf=50;
+  view(`<h1>Asli Duniya</h1><p class="mute small">Dukaan, ghar, sadak, kaam. Kuch jo ajeeb laga.</p>
+    <div class="field"><label for="ao">Kya dekha?</label><textarea id="ao" placeholder="Jaise: chai waale ki dukaan pe shaam 6 baje sabse zyada bheed hoti hai" maxlength="300"></textarea></div>
+    <div class="field"><label for="aq">Kyun / kaise?</label><div class="starters">${['Kyun','Kaise'].map(s=>`<button class="chip" data-st="${s}">${s}...</button>`).join('')}</div><input type="text" id="aq" placeholder="Kyun ... ?" maxlength="200">
+      ${aiFeedback(()=>$('ao').value,'aq','aib1',ASLI_CTX)}<div id="aib1"></div></div>
+    <div class="field"><label for="ag">Tumhara guess</label><input type="text" id="ag" placeholder="Shayad ..." maxlength="200"></div>
+    <div class="field"><label>Kitna sure ho?</label>${chips5('ak',YK,50)}</div>
+    <div id="g2w" hidden class="field"><label for="ag2">Agar ye galat hai, to aur kya ho sakta hai?</label><input type="text" id="ag2" placeholder="Doosra guess..." maxlength="200">
+      ${aiButton('Aur kya ho sakta hai? (AI)','aib2',async()=>{const o=$('ao').value,q=$('aq').value,g=$('ag').value;if(!o||!q||!g)return null;
+        const j=await ai('/aur-kya',{observation:cut(o),sawal:cut(q),guess:cut(g)},ASLI_CTX);if(!j||!j.alternative)return null;
+        return `${esc(j.alternative)}${j.followup_sawal?'<p style="margin:6px 0 0"><i>'+esc(j.followup_sawal)+'</i></p>':''}<button class="link acc" data-fill="ag2" data-v="${esc(j.alternative)}">Doosre guess mein daalo</button>${costLine(j)}`})}<div id="aib2"></div></div>
+    <div class="err" id="ae"></div><p class="hint">Points tab milenge jab tum reality check karke wapas aaoge.</p>`,
+    {as:()=>{const o=$('ao').value.trim(),q=$('aq').value.trim(),g=$('ag').value.trim();
+      if(!o||!q||!g){$('ae').textContent='Dekha, sawal aur guess teeno chahiye.';return}
+      const g2=conf>70?$('ag2').value.trim():'';const k=isKyun(q);S.st.ownQ++;if(k)S.st.kyunQ++;const ref='p'+S.nid;addMyQ(q,'m2',ref);
+      S.pending.push({id:S.nid++,ref,src:'asli',d:today(),obs:o,q,g1:g,conf,g2,ai:ASLI_CTX.aiUsd||0});tick();checkBadges();save();
+      toast('Pending Check bana. Reality dekh ke wapas aao.');go('pending')}},`<button class="btn" id="as">Pending Check banao</button>`);
+  bindChips('ak',v=>{conf=v;$('g2w').hidden=v<=70});
+  document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{const t=$('aq');t.value=b.dataset.st+' ';t.focus()});
+}
+function pending(){
+  view(`<h1>Pending Checks</h1>${S.pending.length?'<p class="mute small">Reality mein dekh ke likho kya nikla. Tabhi points milenge.</p>':'<p class="empty">Abhi koi Pending Check nahi. Bahar kuch ajeeb dikhe to Asli Duniya mein likhna.</p>'}
+    ${S.pending.map(p=>`<div class="item"><div class="meta">${nice(p.d)} · ${daysAgo(p.d)} · ${p.src==='biz'?'Mera Business':'Asli Duniya'}</div>
+      <p class="display" style="font-size:19px;margin:4px 0">${esc(p.obs)}</p><p class="small">${esc(p.q)}</p>
+      <p class="small mute">Guess: ${esc(p.g1)} · ${p.conf}%${p.g2?'<br>Doosra: '+esc(p.g2):''}</p><div id="pf${p.id}"><button class="btn sm" data-p="${p.id}">Check kiya</button></div></div>`).join('')}
+    ${S.checked.length?`<h2>Check ho chuke</h2>${S.checked.slice(-15).reverse().map(c=>`<div class="item"><div class="meta">${nice(c.cd)}</div><span class="tag ${c.m==='sahi'?'g':c.m==='galat'?'b':'a'}">${c.m==='sahi'?'Sahi':c.m==='galat'?'Galat':'Kuch aur hi'}</span>
+      <p style="margin:6px 0 2px;font-weight:700">${esc(c.q)}</p><p class="small mute">Guess: ${esc(c.g1)} · ${c.conf}%</p><p class="small">Nikla: ${esc(c.res)}</p></div>`).join('')}`:''}`,{},
+    S.pending.length?'':`<button class="btn" id="na">Asli Duniya mein likho</button>`);
+  if($('na'))$('na').onclick=()=>go('asli');
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const id=+b.dataset.p;
+    $('pf'+id).innerHTML=`<div class="field" style="margin-top:10px"><label for="pr${id}">Reality mein kya nikla?</label><textarea id="pr${id}" maxlength="300"></textarea></div><div class="err" id="pe${id}"></div>
+      <div class="row"><button class="btn sm" data-m="sahi">Sahi</button><button class="btn sm ghost" data-m="galat">Galat</button><button class="btn sm ghost" data-m="aur">Kuch aur</button></div>`;
+    $('pr'+id).focus();
+    $('pf'+id).querySelectorAll('[data-m]').forEach(mb=>mb.onclick=()=>{const res=$('pr'+id).value.trim();if(res.length<3){$('pe'+id).textContent='Pehle likho kya nikla.';return}
+      const i=S.pending.findIndex(x=>x.id===id);if(i<0)return;const p=S.pending.splice(i,1)[0];
+      p.res=res;p.m=mb.dataset.m;p.cd=today();S.checked.push(p);S.guesses.push({c:p.conf,ok:p.m==='sahi',k:'apna'});S.st.checks+=p.src==='asli'?1:0;
+      if(p.ref)setMyQ(p.ref,p.m==='sahi'?'sahi':p.m==='galat'?'galat':'kuch aur');tick();gain(2,30,'reality check');buzz(20);pending()})});
+}
+
+/* ================= MERA BUSINESS (Mode 4) ================= */
+let SALES=null;
+async function loadSales(){if(SALES)return SALES;SALES=(await IDB.get('sales'))||[];return SALES}
+function parseCSV(txt){txt=txt.replace(/^﻿/,'');const first=txt.split(/\r?\n/)[0]||'';
+  const del=[',',';','\t'].sort((a,b)=>first.split(b).length-first.split(a).length)[0];
+  const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<txt.length;i++){const ch=txt[i];
+    if(q){if(ch==='"'){if(txt[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
+    else if(ch==='"')q=true;else if(ch===del){row.push(f);f=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&txt[i+1]==='\n')i++;row.push(f);f='';if(row.some(x=>x.trim()!==''))rows.push(row);row=[]}
+    else f+=ch}
+  row.push(f);if(row.some(x=>x.trim()!==''))rows.push(row);return rows}
+function parseDate(s){s=String(s||'').trim();let m,y,mo,d,h=null;
+  if(m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/)){y=+m[1];mo=+m[2];d=+m[3];if(m[4]!=null)h=+m[4]}
+  else if(m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})(?:[ T,]+(\d{1,2}):(\d{2})\s*(am|pm)?)?/i)){d=+m[1];mo=+m[2];y=+m[3];if(y<100)y+=2000;if(mo>12&&d<=12){const t=d;d=mo;mo=t}if(m[4]!=null){h=+m[4];if(m[6]){const pm=m[6].toLowerCase()==='pm';if(pm&&h<12)h+=12;if(!pm&&h===12)h=0}}}
+  else return null;
+  if(!(mo>=1&&mo<=12&&d>=1&&d<=31))return null;
+  const ds=y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');return{ds,dow:new Date(ds+'T12:00:00').getDay(),h}}
+function parseTime(s){const m=String(s||'').match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);if(!m)return null;let h=+m[1];if(m[3]){const pm=m[3].toLowerCase()==='pm';if(pm&&h<12)h+=12;if(!pm&&h===12)h=0}return h}
+const num=s=>{const n=parseFloat(String(s||'').replace(/[₹,\s]/g,''));return isFinite(n)?n:0};
+const M4F=[['date','Date (zaroori)',/date|time|din|tarikh/i],['item','Item (zaroori)',/item|product|dish|name/i],['amount','Amount ₹ (zaroori)',/amount|total|price|value|sale|revenue/i],
+  ['qty','Qty',/qty|quantity|count|units/i],['type','Order type',/type|channel|mode|source/i],['oid','Order ID',/order.?id|bill|invoice|order.?no/i],['time','Time (agar alag column)',/^time$|hour/i]];
+let M4TMP=null;
+async function m4(){
+  await loadSales();const st=S.m4;
+  if(st.cur)return m4Round();
+  if(!SALES.length){
+    view(`<h1>Mera Business</h1><p class="mute">Apna sales CSV lao (jaise POS ya Petpooja export). Data sirf is browser mein rehta hai. Kahin upload nahi hota, AI ko bhi nahi.</p>
+      <input type="file" id="f" accept=".csv,text/csv" hidden><div class="err" id="fe"></div>${savedBizHtml()}`,
+      {pick:()=>$('f').click(),smp:async()=>{try{const r=await fetch('./sample/SAMPLE_nakli_restaurant_sales.csv',{cache:'no-store'});if(!r.ok)throw 0;M4TMP={name:'SAMPLE (nakli data)',rows:parseCSV(await r.text())};m4Map()}catch(e){$('fe').textContent='Sample file load nahi hui.'}}},
+      `<button class="btn" id="pick">CSV file chuno</button><button class="link" id="smp">Sample (nakli) data se try karo</button>`);
+    $('f').onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{const rows=parseCSV(String(rd.result));if(rows.length<3){$('fe').textContent='File mein data kam hai.';return}M4TMP={name:file.name,rows};m4Map()};rd.readAsText(file)};
+    bindSavedBiz();return}
+  const obs=m4Obs(),left=obs.filter(o=>!st.obsDone.includes(o.key));
+  view(`<h1>Mera Business</h1><p class="mute small">${esc(st.file||'')} · ${SALES.length} rows · ${niceY(st.from)} se ${niceY(st.to)}</p>
+    ${left.length?'':obs.length?'<p class="empty">Saari observations check ho gayi. Naya data daalo to nayi banengi.</p>':'<p class="empty">Is data se koi saaf pattern nahi mila. Zyada din ka data daal ke dekho.</p>'}
+    ${left.map(o=>`<div class="item"><span class="tag">${o.kind}</span><p class="display" style="font-size:19px;margin:6px 0 8px">${esc(o.text)}</p><button class="btn sm" data-o="${esc(o.key)}">Isse khojo</button></div>`).join('')}
+    ${savedBizHtml()}<p style="margin-top:20px"><button class="link" id="nw">Naya CSV daalo</button></p>`,
+    {nw:async()=>{SALES=[];await IDB.set('sales',[]);S.m4={map:null,file:null,rows:0,obsDone:S.m4.obsDone,cur:null};save();m4()}});
+  document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{buzz(10);S.m4.cur={key:b.dataset.o,step:'obs',aiCalls:0,aiUsd:0};save();m4Round()});
+  bindSavedBiz();
+}
+function savedBizHtml(){const L=S.bizSaved;if(!L.length)return '';return `<h2>Business Khoj se saved sawal</h2>${L.map(b=>`<div class="item"><p style="margin:4px 0;font-weight:700">${esc(b.q)}</p><div id="sb${b.id}"><button class="link acc" data-sb="${b.id}">Andaaza lagao</button></div></div>`).join('')}`}
+function bindSavedBiz(){document.querySelectorAll('[data-sb]').forEach(b=>b.onclick=()=>{const id=+b.dataset.sb,box=$('sb'+id);let conf=50;
+  box.innerHTML=`<div class="field" style="margin-top:8px"><label for="sg${id}">Tumhara guess</label><input type="text" id="sg${id}" maxlength="200"></div><div class="field">${chips5('sc'+id,YK,50)}</div><button class="btn sm" id="sk${id}">Pending Check banao</button>`;
+  bindChips('sc'+id,v=>conf=v);
+  $('sk'+id).onclick=()=>{const g=$('sg'+id).value.trim();if(!g)return;const i=S.bizSaved.findIndex(x=>x.id===id);const sb=S.bizSaved.splice(i,1)[0];
+    const ref='p'+S.nid;addMyQ(sb.q,'m4',ref);S.pending.push({id:S.nid++,ref,src:'biz',d:today(),obs:'Business Khoj se',q:sb.q,g1:g,conf,g2:''});tick();save();toast('Pending Check bana');go('pending')}})}
+function m4Map(){const hdr=M4TMP.rows[0].map(h=>h.trim());
+  const used=new Set(),auto={};M4F.forEach(([k,,re])=>{const i=hdr.findIndex((h,j)=>re.test(h)&&!used.has(j));if(i>=0){auto[k]=i;used.add(i)}});
+  view(`<h1>Kaunsa column kya hai?</h1><p class="mute small">${esc(M4TMP.name)} · ${M4TMP.rows.length-1} rows</p>
+    ${M4F.map(([k,lab])=>`<div class="field"><label for="mp_${k}">${lab}</label><select id="mp_${k}"><option value="-1">— nahi hai —</option>${hdr.map((h,i)=>`<option value="${i}" ${auto[k]===i?'selected':''}>${esc(h)}</option>`).join('')}</select></div>`).join('')}
+    <p class="small mute">Pehli row: ${esc(M4TMP.rows[1].join(' | '))}</p><div class="err" id="me"></div>`,{bk:()=>{M4TMP=null;m4()},ok:async()=>{
+      const mp={};M4F.forEach(([k])=>mp[k]=+$('mp_'+k).value);
+      if(mp.date<0||mp.item<0||mp.amount<0){$('me').textContent='Date, Item aur Amount zaroori hain.';return}
+      const out=[];let bad=0;
+      for(const r of M4TMP.rows.slice(1)){const dt=parseDate(r[mp.date]);if(!dt||!String(r[mp.item]||'').trim()){bad++;continue}
+        let h=dt.h;if(mp.time>=0){const t=parseTime(r[mp.time]);if(t!=null)h=t}
+        out.push({d:dt.ds,w:dt.dow,h,i:String(r[mp.item]).trim(),q:mp.qty>=0?(num(r[mp.qty])||1):1,a:num(r[mp.amount]),t:mp.type>=0?String(r[mp.type]||'').trim()||'—':null,o:mp.oid>=0?String(r[mp.oid]||'').trim():null})}
+      if(out.length<20){$('me').textContent='Sirf '+out.length+' rows padh paaye. Date ka format check karo.';return}
+      out.sort((a,b)=>a.d<b.d?-1:1);SALES=out;await IDB.set('sales',out);
+      S.m4.map=mp;S.m4.file=M4TMP.name;S.m4.rows=out.length;S.m4.from=out[0].d;S.m4.to=out[out.length-1].d;S.m4.cur=null;save();M4TMP=null;
+      toast(out.length+' rows save hue'+(bad?' · '+bad+' chhode':''));m4()}},
+    `<button class="btn" id="ok">Data save karo (sirf is browser mein)</button><button class="link" id="bk">Wapas</button>`)}
+function groupSum(rows,keyFn,valFn){const m=new Map();for(const r of rows){const k=keyFn(r);m.set(k,(m.get(k)||0)+valFn(r))}return m}
+function m4Obs(){const R=SALES;if(!R||R.length<20)return[];const from=R[0].d,to=R[R.length-1].d,rng=` (${nice(from)} – ${nice(to)})`;const out=[];
+  const rev=groupSum(R,r=>r.i,r=>r.a),items=[...rev].sort((a,b)=>b[1]-a[1]),total=items.reduce((s,x)=>s+x[1],0);
+  const dates=[...new Set(R.map(r=>r.d))],dowCount=[0,0,0,0,0,0,0];dates.forEach(d=>dowCount[new Date(d+'T12:00:00').getDay()]++);
+  let best=null;
+  for(const [it] of items.slice(0,8)){const q=groupSum(R.filter(r=>r.i===it),r=>r.w,r=>r.q);
+    for(let w=0;w<7;w++){if(dowCount[w]<3)continue;const avgW=(q.get(w)||0)/dowCount[w];let os=0,od=0;for(let x=0;x<7;x++)if(x!==w){os+=q.get(x)||0;od+=dowCount[x]}if(!od)continue;const avgO=os/od;if(!avgO)continue;
+      const df=(avgW-avgO)/avgO*100;if(Math.abs(df)>=20&&(!best||Math.abs(df)>Math.abs(best.df)))best={it,w,df,avgW,avgO}}}
+  if(best)out.push({key:`dow|${best.it}|${best.w}|${from}|${to}`,kind:'Din-wise',scope:{item:best.it},
+    text:`${best.it} ki sale ${DIN[best.w]} ko baaki dino se ${pct(Math.abs(best.df))} ${best.df<0?'kam':'zyada'} hai (avg ${best.avgW.toFixed(1)} vs ${best.avgO.toFixed(1)} plates/din)${rng}.`});
+  const lastSun=(()=>{let d=to;while(new Date(d+'T12:00:00').getDay()!==0)d=addDays(d,-1);return d})();
+  const wkStart=k=>addDays(lastSun,-7*k-6);
+  if(diffDays(from,wkStart(3))>=0){let tr=null;
+    for(const [it] of items.slice(0,10)){const w=[3,2,1,0].map(k=>{const a=wkStart(k),b=addDays(a,6);return R.filter(r=>r.i===it&&r.d>=a&&r.d<=b).reduce((s,r)=>s+r.q,0)});
+      const up=w.every((v,i)=>i===0||v>w[i-1]),dn=w.every((v,i)=>i===0||v<w[i-1]);
+      if((up||dn)&&w[0]>0){const ch=(w[3]-w[0])/w[0]*100;if(!tr||Math.abs(ch)>Math.abs(tr.ch))tr={it,w,up,ch}}}
+    if(tr)out.push({key:`trend|${tr.it}|${wkStart(3)}|${lastSun}`,kind:'Hafte-wise',scope:{item:tr.it},
+      text:`Pichhle 4 hafte mein ${tr.it} ki sale lagataar ${tr.up?'badhi':'ghati'}: ${tr.w.join(' → ')} (${nice(wkStart(3))} – ${nice(lastSun)}).`})}
+  if(R[0].t!=null){const bills=new Map();for(const r of R){const k=r.o||('row'+bills.size);const b=bills.get(k)||{t:r.t,a:0};b.a+=r.a;bills.set(k,b)}
+    const byT=new Map();for(const b of bills.values()){const x=byT.get(b.t)||{s:0,n:0};x.s+=b.a;x.n++;byT.set(b.t,x)}
+    const T=[...byT].filter(([,x])=>x.n>=10).map(([t,x])=>({t,avg:x.s/x.n,n:x.n})).sort((a,b)=>b.avg-a.avg);
+    if(T.length>=2){const hi=T[0],lo=T[T.length-1],d=hi.avg-lo.avg;if(d>=1)out.push({key:`type|${hi.t}|${lo.t}|${from}|${to}`,kind:'Order type',scope:{},
+      text:`${hi.t} orders ka average ${R[0].o!=null?'bill':'line amount'} ${lo.t} se ${rupee(d)} zyada hai (${rupee(hi.avg)} vs ${rupee(lo.avg)})${rng}.`})}}
+  if(items.length>=4&&total>0){let cum=0,k=0;while(k<items.length&&cum/total<0.5){cum+=items[k][1];k++}
+    if(k<=Math.max(3,Math.floor(items.length/3)))out.push({key:`pareto|${k}|${from}|${to}`,kind:'Item-wise',scope:{},
+      text:`Ye ${k} items ${pct(cum/total*100)} revenue laate hain: ${items.slice(0,k).map(x=>x[0]).join(', ')} (kul ${items.length} items mein se)${rng}.`})}
+  const H=R.filter(r=>r.h!=null);if(H.length>R.length*0.8){const sl=groupSum(H,r=>slot(r.h),r=>r.a),st=[...sl].sort((a,b)=>b[1]-a[1]);const tot=H.reduce((s,r)=>s+r.a,0);
+    if(st.length>=3)out.push({key:`slot|${st[0][0]}|${from}|${to}`,kind:'Time slot',scope:{},text:`${st[0][0]} mein ${pct(st[0][1]/tot*100)} revenue aata hai${rng}.`})}
+  return out}
+function slot(h){return h<6?'Der raat (12-6)':h<11?'Subah (6-11)':h<16?'Dopahar (11-4)':h<20?'Shaam (4-8)':'Raat (8-12)'}
+function hbars(list,fmt){const mx=Math.max(...list.map(x=>x.v),0.0001);const top=Math.max(...list.map(x=>x.v));
+  return list.map(x=>`<div class="hbar ${x.v===top?'hi':''}"><div class="lb"><span>${esc(x.l)}</span><span>${fmt(x.v)}${x.s?' · '+x.s:''}</span></div><div class="tr"><i style="width:${x.v/mx*100}%"></i></div></div>`).join('')}
+function breakdown(tab,scope){const R0=SALES,R=scope.item?R0.filter(r=>r.i===scope.item):R0,val=scope.item?(r=>r.q):(r=>r.a),unit=scope.item?(v=>v.toFixed(1)+' plates'):rupee;
+  const dates=[...new Set(R0.map(r=>r.d))],dc=[0,0,0,0,0,0,0];dates.forEach(d=>dc[new Date(d+'T12:00:00').getDay()]++);
+  if(tab==='din'){const g=groupSum(R,r=>r.w,val);return `<p class="small mute">Har din ka average${scope.item?' ('+esc(scope.item)+')':''}</p>`+hbars([1,2,3,4,5,6,0].filter(w=>dc[w]).map(w=>({l:DIN[w],v:(g.get(w)||0)/dc[w],s:dc[w]+' din'})),unit)}
+  if(tab==='type'){if(R[0]&&R[0].t==null)return '<p class="mute small">Order type ka column nahi hai.</p>';const g=groupSum(R,r=>r.t,val),tot=[...g.values()].reduce((s,v)=>s+v,0);
+    return `<p class="small mute">Order type ke hisaab se kul${scope.item?' ('+esc(scope.item)+')':''}</p>`+hbars([...g].sort((a,b)=>b[1]-a[1]).map(([t,v])=>({l:t,v,s:pct(v/tot*100)})),scope.item?(v=>Math.round(v)+' plates'):rupee)}
+  if(tab==='item'){const g=groupSum(R0,r=>r.i,r=>r.a),tot=[...g.values()].reduce((s,v)=>s+v,0);return '<p class="small mute">Item-wise revenue (top 10)</p>'+hbars([...g].sort((a,b)=>b[1]-a[1]).slice(0,10).map(([i,v])=>({l:i,v,s:pct(v/tot*100)})),rupee)}
+  if(tab==='slot'){const H=R.filter(r=>r.h!=null);if(!H.length)return '<p class="mute small">Time ka data nahi hai.</p>';const g=groupSum(H,r=>slot(r.h),val);
+    return `<p class="small mute">Time slot ke hisaab se kul${scope.item?' ('+esc(scope.item)+')':''}</p>`+hbars(['Subah (6-11)','Dopahar (11-4)','Shaam (4-8)','Raat (8-12)','Der raat (12-6)'].filter(s=>g.has(s)).map(s=>({l:s,v:g.get(s)})),scope.item?(v=>Math.round(v)+' plates'):rupee)}
+  if(tab==='week'){const to=R0[R0.length-1].d,wk=[];for(let k=7;k>=0;k--){const b=addDays(to,-7*k),a=addDays(b,-6);if(a<R0[0].d)continue;wk.push({l:nice(a)+' – '+nice(b),v:R.filter(r=>r.d>=a&&r.d<=b).reduce((s,r)=>s+val(r),0)})}
+    return '<p class="small mute">Hafte-wise kul (aakhri 8 hafte)</p>'+hbars(wk,scope.item?(v=>Math.round(v)+' plates'):rupee)}
+  return ''}
+function m4Round(){const C=S.m4.cur,o=m4Obs().find(x=>x.key===C.key);if(!o){S.m4.cur=null;save();return m4()}
+  const set=(k,v,step)=>{C[k]=v;if(step)C.step=step;save();m4Round()};
+  const ocard=`<div class="rcard"><div class="rc-in"><div class="face"><div class="rc-head"><span>Mera Business · ${o.kind}</span></div><p class="obs sm">${esc(o.text)}</p></div></div></div>`;
+  if(C.step==='obs'){let conf=C.conf||50;
+    view(ocard+`<div class="step"><div class="field"><label for="mq">Kyun? Tumhara sawal</label><input type="text" id="mq" maxlength="200" placeholder="Kyun ...?" value="${esc(C.q||'')}"></div>
+      ${aiButton('AI se sawal aur guess idea lo','aim',async()=>{const j=await ai('/data-sawal',{observation_text_with_numbers:cut(o.text)},C);if(!j||!j.sawal)return null;
+        return `<i>${esc(j.sawal)}</i> <button class="link acc" data-fill="mq" data-v="${esc(j.sawal)}">Sawal use karo</button>${(j.guesses||[]).slice(0,2).map(g=>`<p style="margin:6px 0 0">${esc(g)} <button class="link acc" data-fill="mg" data-v="${esc(g)}">Guess use karo</button></p>`).join('')}${costLine(j)}`})}<div id="aim"></div>
+      <div class="field"><label for="mg">Tumhara guess (jo data se check ho sake)</label><input type="text" id="mg" maxlength="200" placeholder="Shayad ..."></div>
+      <div class="field"><label>Kitna sure ho?</label>${chips5('mc',YK,conf)}</div><div class="err" id="me"></div></div>`,
+      {bk:()=>{S.m4.cur=null;save();m4()},ok:()=>{const q=$('mq').value.trim(),g=$('mg').value.trim();if(!q||!g){$('me').textContent='Sawal aur guess dono likho.';return}
+        const k=isKyun(q);S.st.ownQ++;if(k)S.st.kyunQ++;C.ref='d'+S.nid;addMyQ(q,'m4',C.ref);C.q=q;C.g=g;C.conf=conf;C.tab=o.scope.item?'din':'item';C.step='check';save();m4Round()}},
+      `<button class="btn" id="ok">Check karo</button><button class="link" id="bk">Wapas</button>`);
+    bindChips('mc',v=>conf=v);return}
+  if(C.step==='check'){const tabs=[['din','Din-wise'],['type','Order type'],['item','Item-wise'],['slot','Time slot'],['week','Hafte-wise']];
+    view(ocard+`<div class="step"><p class="small"><b>Guess:</b> ${esc(C.g)} · ${C.conf}%</p><div class="tabs">${tabs.map(([k,l])=>`<button data-t="${k}" class="${C.tab===k?'on':''}">${l}</button>`).join('')}</div>
+      <div>${breakdown(C.tab,o.scope)}</div><p class="q" style="margin-top:16px">Data ne tumhara guess...</p></div>`,
+      {ys:()=>m4Mark(o,'support'),no:()=>m4Mark(o,'nahi'),pn:()=>m4Mark(o,'pata nahi')},
+      `<div class="row" style="width:100%"><button class="btn" id="ys">Support kiya</button><button class="btn ghost" id="no">Nahi kiya</button></div><button class="link" id="pn">Pata nahi (data se check nahi hota)</button>`);
+    document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{buzz(8);set('tab',b.dataset.t)});return}
+  if(C.step==='naya'){let conf=50;
+    view(ocard+`<div class="step"><p class="small">Purana guess: ${esc(C.g)}</p><div class="field"><label for="ng">Data dekh ke ab kya lagta hai?</label><input type="text" id="ng" maxlength="200"></div>
+      <div class="field">${chips5('nc',YK,50)}</div><div class="err" id="ne"></div></div>`,
+      {ok:()=>{const g=$('ng').value.trim();if(!g){$('ne').textContent='Naya guess likho.';return}S.st.dataWrongNew++;gain(0,20,'naya guess');
+        S.pending.push({id:S.nid++,ref:C.ref,src:'biz',d:today(),obs:o.text,q:C.q,g1:g,conf,g2:''});S.m4.cur=null;save();toast('Naya guess Pending Checks mein gaya');m4()},
+       sk:()=>{S.m4.cur=null;save();m4()}},`<button class="btn" id="ok">Naya guess pakka</button><button class="link" id="sk">Abhi nahi</button>`);
+    bindChips('nc',v=>conf=v);return}
+}
+function m4Mark(o,mark){const C=S.m4.cur;S.m4.obsDone.push(o.key);tick();setMyQ(C.ref,mark);
+  if(mark==='pata nahi'){S.pending.push({id:S.nid++,ref:C.ref,src:'biz',d:today(),obs:o.text,q:C.q,g1:C.g,conf:C.conf,g2:''});S.m4.cur=null;save();toast('Pending Check bana. Bahar jaake check karo.');return go('pending')}
+  S.guesses.push({c:C.conf,ok:mark==='support',k:'apna'});S.st.dataChecks++;gain(2,25,'data se check');buzz(20);
+  if(mark==='nahi'){C.step='naya';save();return m4Round()}
+  S.m4.cur=null;save();m4()}
+
+/* ================= BAHAR (Bahar ki Khoj + Pending) ================= */
+const CEI=['Nayi cheez dikhe to uske baare mein aur jaanne ka mann karta hai.','Aise kaam achhe lagte hain jisme kuch naya seekhna pade.','Kisi cheez ka "kyun" samajhne ke liye extra time dena theek lagta hai.',
+ 'Roz ke kaam mein bhi kuch naya notice ho jaata hai.','Mushkil sawal se bachne ki jagah usme ghusne ka mann karta hai.','Jab pata na ho aage kya hoga, wo bhi kabhi-kabhi mazedaar lagta hai.',
+ 'Galat saabit hona bura nahi lagta agar usse kuch seekhne ko mile.','Anjaan logon ya jagahon se milna achha lagta hai.','Apne pakke vichaar pe sawal uthana theek lagta hai.','Jo samajh na aaye, use poochh lena aasan lagta hai.'];
+function phaseOf(d){const B=S.bahar;if(!B.start||diffDays(B.start,d)<14)return 'baseline';if(B.breakStart&&d>=B.breakStart&&d<=(B.breakEnd||addDays(B.breakStart,13)))return 'break';return 'game'}
+const PH={baseline:['Baseline','var(--mute)'],game:['Game ke saath','var(--acc)'],break:['Break','var(--good)']};
+let BH={tab:'aaj',cei:null};
+function bahar(){const B=S.bahar,t=today(),e=B.entries[t]||{q:0,c:0,p:0,lines:''},ph=B.start?phaseOf(t):'baseline';
+  const ceiDue=!B.cei.length||diffDays(B.cei[B.cei.length-1].d,t)>=56;const pc=S.pending.length;
+  const tabs=`<div class="tabs">${[['aaj','Aaj'],['chart','Chart'],['cei','Self-check'],['pending','Pending'+(pc?' ('+pc+')':'')]].map(([k,l])=>`<button data-bt="${k}" class="${BH.tab===k?'on':''}">${l}</button>`).join('')}</div>`;
+  if(BH.tab==='pending'){BH.tab='aaj';return go('pending')}
+  if(BH.tab==='aaj'){const day=B.start?diffDays(B.start,t)+1:1;
+    view(`<h1>Bahar ki Khoj</h1>${tabs}<p class="small mute">${ph==='baseline'?`Baseline din ${Math.min(day,14)}/14. Chaho to in dino game band rakho.`:ph==='break'?'Break chal raha hai.':'Phase: Game ke saath'}</p>
+      ${[['q','Aaj kitne "kyun/kaise" sawal KHUD aaye?','Game ke suggest kiye hue mat gino'],['c','Unme se kitne check kiye?','Data dekha, poocha, padha, ya khud jaake dekha'],['p','Kitne logon se kuch naya poocha?','']].map(([k,l,h])=>`
+      <div class="field"><label>${l}</label>${h?`<p class="hint" style="margin:0">${h}</p>`:''}<div class="stepper"><button data-dec="${k}" aria-label="Kam">−</button><output id="o_${k}">${e[k]}</output><button data-inc="${k}" aria-label="Zyada">+</button></div></div>`).join('')}
+      <div class="field"><label for="bl">Sawal ek-ek line mein (chahe to)</label><textarea id="bl" maxlength="1000">${esc(e.lines||'')}</textarea></div>
+      <div class="err" id="be"></div><p class="hint">XP sirf entry ka milta hai (+5), numbers ka nahi. Jaisa hua waisa likho.</p>
+      <p>${ph!=='baseline'&&!B.breakStart?'<button class="link" id="brk">2 hafte ka Break shuru karo</button>':''}${ph==='break'?'<button class="link" id="brkE">Break khatam karo</button>':''}${ceiDue?' <button class="link acc" id="gc">Self-check karo</button>':''}</p>`,
+      {bs:()=>{const v={q:+$('o_q').textContent,c:+$('o_c').textContent,p:+$('o_p').textContent,lines:$('bl').value.trim()};if(v.c>v.q){$('be').textContent='Check kiye hue sawal, aaye hue sawalon se zyada nahi ho sakte.';return}
+         const first=!B.entries[t];if(!B.start)B.start=t;v.phase=phaseOf(t);B.entries[t]=v;tick();if(first)gain(0,5,'Bahar ki Khoj entry');else{save();toast('Entry update hui')}checkBadges();bahar()},
+       brk:()=>{B.breakStart=t;B.breakEnd=null;save();bahar()},brkE:()=>{if(t<=B.breakStart){B.breakStart=null;B.breakEnd=null}else B.breakEnd=addDays(t,-1);save();bahar()},gc:()=>{BH.tab='cei';bahar()}},
+      `<button class="btn" id="bs">${B.entries[t]?'Entry update karo':'Aaj ki entry save karo'}</button>`);
+    document.querySelectorAll('[data-inc],[data-dec]').forEach(b=>b.onclick=()=>{buzz(8);const k=b.dataset.inc||b.dataset.dec,o=$('o_'+k);o.textContent=Math.max(0,Math.min(99,+o.textContent+(b.dataset.inc?1:-1)))});
+  }else if(BH.tab==='chart'){view(`<h1>Bahar ki Khoj</h1>${tabs}${baharChart()}`);
+  }else{if(!BH.cei)BH.cei=Array(10).fill(0);
+    view(`<h1>Self-check</h1>${tabs}<p class="small mute">Ye self-report hai: sirf tumhari apni raay, koi test nahi. Shuru mein aur har 8 hafte baad. 1 = bilkul nahi, 5 = bilkul haan.</p>
+      ${CEI.map((q,i)=>`<div class="field"><label>${i+1}. ${q}</label><div class="likert">${[1,2,3,4,5].map(v=>`<button data-l="${i}" data-v="${v}" class="${BH.cei[i]===v?'on':''}">${v}</button>`).join('')}</div></div>`).join('')}
+      <div class="err" id="ce"></div>${B.cei.length?`<h2>Pichhle self-check</h2>${B.cei.map(x=>`<p class="small">${niceY(x.d)}: <b>${x.score}</b>/50 · explore ${x.a}/25 · anishchitta ${x.b}/25</p>`).join('')}`:''}`,
+      {cs:()=>{if(BH.cei.some(v=>!v)){$('ce').textContent='Saare 10 sawal ka jawab do.';return}
+        const a=BH.cei.slice(0,5).reduce((s,v)=>s+v,0),b=BH.cei.slice(5).reduce((s,v)=>s+v,0);B.cei.push({d:t,answers:BH.cei,score:a+b,a,b});BH.cei=null;save();toast('Self-check save hua');BH.tab='aaj';bahar()}},`<button class="btn" id="cs">Save karo</button>`);
+    document.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{buzz(8);BH.cei[+b.dataset.l]=+b.dataset.v;document.querySelectorAll(`[data-l="${b.dataset.l}"]`).forEach(x=>x.classList.toggle('on',x===b))});
+  }
+  document.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{buzz(8);BH.tab=b.dataset.bt;bahar()});
+}
+function baharChart(){const B=S.bahar,E=Object.entries(B.entries);if(!E.length)return '<p class="empty">Abhi koi entry nahi. Aaj ki entry se shuru karo.</p>';
+  const W=new Map();for(const [d,e] of E){const w=Math.floor(diffDays(B.start,d)/7);const x=W.get(w)||{q:0,c:0,p:0,n:0,ph:{}};x.q+=e.q;x.c+=e.c;x.p+=e.p;x.n++;const ph=phaseOf(d);x.ph[ph]=(x.ph[ph]||0)+1;W.set(w,x)}
+  const wk=[...W].sort((a,b)=>a[0]-b[0]).map(([w,x])=>({w,q:x.q/x.n,c:x.c/x.n,p:x.p/x.n,n:x.n,ph:Object.entries(x.ph).sort((a,b)=>b[1]-a[1])[0][0]}));
+  const Wd=320,H=200,L=30,Bm=34,T=10,Rr=8,pw=Wd-L-Rr,ph=H-T-Bm,mx=Math.max(1,...wk.flatMap(x=>[x.q,x.c,x.p]));
+  const n=Math.max(wk.length,2),sx=i=>L+(wk.length===1?pw/2:i/(n-1)*pw),sy=v=>T+ph-v/mx*ph,bw=pw/Math.max(wk.length,1);
+  let s=`<svg class="chart" viewBox="0 0 ${Wd} ${H}" role="img" aria-label="Bahar ki Khoj hafte-wise chart">`;
+  wk.forEach((x,i)=>{const cx=sx(i);s+=`<rect x="${Math.max(L,cx-bw/2)}" y="${T}" width="${Math.min(bw,pw)}" height="${ph}" fill="${PH[x.ph][1]}" opacity=".10"/><text x="${cx}" y="${H-18}" text-anchor="middle">H${x.w+1}</text>`});
+  [0,mx/2,mx].forEach(v=>s+=`<line x1="${L}" x2="${Wd-Rr}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--line)"/><text x="${L-5}" y="${sy(v)+4}" text-anchor="end">${v.toFixed(1)}</text>`);
+  const lines=[['q','var(--acc)','Khud ke sawal'],['c','var(--good)','Check kiye'],['p','var(--mute)','Logon se poocha']];
+  lines.forEach(([k,col])=>{s+=`<polyline fill="none" stroke="${col}" stroke-width="2.5" points="${wk.map((x,i)=>sx(i)+','+sy(x[k])).join(' ')}"/>`;wk.forEach((x,i)=>s+=`<circle cx="${sx(i)}" cy="${sy(x[k])}" r="3.5" fill="${col}"/>`)});
+  s+=`<text x="${Wd-Rr}" y="${H-2}" text-anchor="end">Hafta →</text></svg>`;
+  const avg=(ph,k)=>{const L2=E.filter(([d])=>phaseOf(d)===ph);return L2.length?L2.reduce((a,[,e])=>a+e[k],0)/L2.length:null};
+  const nB=E.filter(([d])=>phaseOf(d)==='baseline').length,nG=E.filter(([d])=>phaseOf(d)==='game').length;
+  let sum='';if(nB>=3&&nG>=3){const f=k=>{const b=avg('baseline',k),g=avg('game',k);return b>0?(g/b).toFixed(1)+'x':'baseline 0, ab '+g.toFixed(1)+'/din'};
+    sum=`Baseline ke mukable khud ke sawal ${f('q')}, check kiye ${f('c')}, logon se poocha ${f('p')}.`}
+  else sum=`Summary ke liye baseline aur game dono phase mein kam se kam 3 entries chahiye (abhi ${nB} aur ${nG}).`;
+  const nK=E.filter(([d])=>phaseOf(d)==='break').length;if(nK>=3&&nG>=3){const b=avg('break','q'),g=avg('game','q');sum+=` Break mein khud ke sawal ${b.toFixed(1)}/din (game ke saath ${g.toFixed(1)}/din).`}
+  return s+`<div class="legend">${lines.map(([,c,l])=>`<span><i style="background:${c}"></i>${l}</span>`).join('')}</div>
+    <div class="legend">${Object.values(PH).map(([l,c])=>`<span><i style="background:${c};opacity:.35;border-radius:2px"></i>${l}</span>`).join('')}</div><p style="margin-top:12px">${sum}</p>`}
+
+/* ================= MERA ================= */
+function mera(){const l=levelOf(S.xp),nx=LV[l+1],cur=LV[l][1],late=l>=3,cd=calib('duniya'),ca=calib('apna');
+  const myq=S.myQs.slice(-(late?10:4)).reverse();
+  const resTag=r=>r==null?'<span class="tag a">Khula</span>':/sahi|support/.test(r)?'<span class="tag g">'+esc(r)+'</span>':/galat|nahi$/.test(r)?'<span class="tag b">'+esc(r)+'</span>':'<span class="tag">'+esc(r)+'</span>';
+  const qs=`<h2 style="${late?'font-size:26px;margin-top:8px':''}">Tumhare sawal</h2>${myq.length?myq.map(q=>`<div class="item"><div class="meta">${nice(q.d)} · ${({m1:'Khoj Yatra',m3:'Business',m2:'Asli Duniya',m4:'Mera Business'})[q.src]||''}</div><p style="margin:4px 0;font-weight:700;${late?'font-size:18px':''}">${esc(q.t)}</p>${resTag(q.res)}</div>`).join(''):'<p class="empty">Abhi koi khud ka sawal nahi. Round mein apna sawal likhoge to yahan dikhega.</p>'}`;
+  const lvl=late?`<p class="small mute" style="margin-top:20px">Level ${l+1} · ${LV[l][0]} · ${S.xp} XP</p><div class="bar thin"><i style="width:${nx?Math.min(100,(S.xp-cur)/(nx[1]-cur)*100):100}%"></i></div>`
+   :`<div class="label">Level ${l+1}</div><h1 style="margin-top:0">${LV[l][0]}</h1><div class="bar"><i style="width:${nx?Math.min(100,(S.xp-cur)/(nx[1]-cur)*100):100}%"></i></div><p class="small mute">${S.xp} XP${nx?' · '+(nx[1]-S.xp)+' aur, phir '+nx[0]:''}</p>`;
+  const stats=`<div class="grid2"><div class="kv"><div class="n">${S.coins}</div><div class="t">Coins</div></div><div class="kv"><div class="n">${streakNow()}</div><div class="t">Din ki streak</div></div>
+    <div class="kv"><div class="n">${cd??'–'}</div><div class="t">Calibration · Duniya</div></div><div class="kv"><div class="n">${ca??'–'}</div><div class="t">Calibration · Apna</div></div></div>${overconf()?'<p class="note">Pakke guesses aksar galat nikle.</p>':''}`;
+  view(`<div class="row" style="justify-content:space-between"><span class="label" style="margin:0">Mera</span><button class="iconbtn" data-go="settings" aria-label="Settings" style="margin:0 -10px 0 0">${icon('gear')}</button></div>
+    ${late?qs+lvl+stats:lvl+stats+qs}
+    <div class="menu" style="margin-top:18px"><button data-go="pattern">Mera Pattern <small>Yakeen vs ichha</small></button><button data-go="badges">Badges <small>${Object.keys(S.badges).length}/${BADGES.length}</small></button><button data-go="kharcha">Kharcha <small>AI ka hisaab</small></button><button data-go="settings">Settings <small>AI, sync, backup</small></button></div>`);
+}
+
+/* ================= MERA PATTERN ================= */
+let PTAB='duniya';
+function pattern(){
+  const R=S.rounds.filter(r=>r.c!=null&&r.ich!=null);
+  const W=320,H=220,L=34,B=30,T=10,Rr=10,pw=W-L-Rr,ph=H-T-B,sx=c=>L+c/100*pw,sy=i=>T+ph-(i-1)/6*ph;
+  let sc=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Yakeen vs ichha"><rect x="${sx(35)}" y="${T}" width="${sx(65)-sx(35)}" height="${ph}" fill="var(--acc-soft)" opacity=".6"/>`;
+  for(let i=1;i<=7;i++)sc+=`<line x1="${L}" x2="${W-Rr}" y1="${sy(i)}" y2="${sy(i)}" stroke="var(--line)"/><text x="${L-8}" y="${sy(i)+4}" text-anchor="end">${i}</text>`;
+  [0,25,50,75,100].forEach(c=>sc+=`<text x="${sx(c)}" y="${H-12}" text-anchor="middle">${c}%</text>`);
+  R.forEach(r=>sc+=`<circle cx="${sx(r.c)}" cy="${sy(r.ich)}" r="6" fill="${r.op?'var(--acc)':'var(--surface)'}" stroke="${r.m===3?'var(--ink)':'var(--acc)'}" stroke-width="2"/>`);
+  sc+=`<text x="${W-Rr}" y="${H-1}" text-anchor="end">Yakeen →</text><text transform="translate(9 ${T+ph/2}) rotate(-90)" text-anchor="middle">Ichha</text></svg>`;
+  const bk=[['Kam (<35%)',r=>r.c<35],['Beech (35-65%)',r=>r.c>=35&&r.c<=65],['Pakka (>65%)',r=>r.c>65]].map(([n,fn])=>{const a=R.filter(fn);return{n,cnt:a.length,avg:a.length?a.reduce((s,r)=>s+r.ich,0)/a.length:0}});
+  const mx=Math.max(...bk.map(b=>b.avg));
+  const bars=bk.map(b=>`<div class="hbar ${b.cnt&&b.avg===mx?'hi':''}"><div class="lb"><span>${b.n}</span><span>${b.cnt?b.avg.toFixed(1)+' / 7 · '+b.cnt+' sawal':'abhi data nahi'}</span></div><div class="tr"><i style="width:${b.avg/7*100}%"></i></div></div>`).join('');
+  const G=S.guesses.filter(g=>g.k===PTAB),cbk=[0,20,40,60,80].map(lo=>{const a=G.filter(g=>g.c>=lo&&(lo===80?g.c<=100:g.c<lo+20));return{lo,n:a.length,p:a.length?a.filter(g=>g.ok).length/a.length*100:null}});
+  const CW=320,CH=200,cl=34,cb=30,ct=14,cr=10,cpw=CW-cl-cr,cph=CH-ct-cb,bw=cpw/5;
+  let cs=`<svg class="chart" viewBox="0 0 ${CW} ${CH}" role="img" aria-label="Calibration chart">`;
+  [0,50,100].forEach(v=>{const y=ct+cph-v/100*cph;cs+=`<line x1="${cl}" x2="${CW-cr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${cl-6}" y="${y+4}" text-anchor="end">${v}%</text>`});
+  cs+=`<line x1="${cl}" y1="${ct+cph}" x2="${CW-cr}" y2="${ct}" stroke="var(--mute)" stroke-dasharray="4 4"/>`;
+  cbk.forEach((b,i)=>{const x=cl+i*bw;if(b.p!=null){const h=b.p/100*cph;cs+=`<rect x="${x+6}" y="${ct+cph-h}" width="${bw-12}" height="${Math.max(h,1.5)}" rx="4" fill="var(--acc)"/><text x="${x+bw/2}" y="${ct+cph-h-4}" text-anchor="middle">${Math.round(b.p)}%</text>`}
+    cs+=`<text x="${x+bw/2}" y="${CH-14}" text-anchor="middle">${b.lo}-${b.lo+20}</text><text x="${x+bw/2}" y="${CH-2}" text-anchor="middle">n=${b.n}</text>`});
+  cs+='</svg>';
+  const cbv=calib(PTAB),opened=R.filter(r=>r.op).length,src=k=>S.myQs.filter(q=>q.src===k).length;
+  view(`<h1>Mera Pattern</h1><h2>Yakeen aur ichha</h2>${R.length?sc+`<div class="legend"><span><i style="background:var(--acc)"></i>Khola</span><span><i style="border:2px solid var(--acc);width:8px;height:8px"></i>Chhoda</span><span><i style="border:2px solid var(--ink);width:8px;height:8px"></i>Business</span></div>`:'<p class="empty">Rounds khelo, yahan dots aayenge.</p>'}
+    <h2>Ichha kab sabse zyada?</h2>${bars}<p class="hint">Average ichha (1-7), yakeen ke hisaab se.</p>
+    <h2>Calibration</h2><div class="tabs"><button data-pt="duniya" class="${PTAB==='duniya'?'on':''}">Duniya (Mode 1/3)</button><button data-pt="apna" class="${PTAB==='apna'?'on':''}">Apna (Mode 2/4)</button></div>
+    <p class="display" style="font-size:22px">${cbv===null?'Abhi data nahi':'Score: '+cbv+' / 100'}</p>${G.length?cs+'<p class="hint">Bar = us yakeen pe kitni baar sahi nikle. Dashed line = imaandaar yakeen.</p>':''}${overconf(PTAB)?'<p class="note">Pakke guesses aksar galat nikle.</p>':''}
+    <h2>Khud ke sawal</h2><div class="grid2"><div class="kv"><div class="n">${S.st.ownQ}</div><div class="t">Kul khud banaye</div></div><div class="kv"><div class="n">${S.st.kyunQ}</div><div class="t">Kyun/kaise wale</div></div>
+    <div class="kv"><div class="n">${src('m1')+src('m3')}</div><div class="t">Yatra + Business</div></div><div class="kv"><div class="n">${src('m2')+src('m4')}</div><div class="t">Asli + Mera Business</div></div>
+    <div class="kv"><div class="n">${opened}</div><div class="t">Answer khole</div></div><div class="kv"><div class="n">${R.length-opened}</div><div class="t">Chhode</div></div></div>`,{},`<button class="btn ghost" data-go="mera">Wapas</button>`);
+  document.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{PTAB=b.dataset.pt;pattern()});
+}
+function badges(){
+  view(`<h1>Badges</h1><p class="mute small">${Object.keys(S.badges).length}/${BADGES.length} · Locked badges ki shart chhupi hai.</p>
+    <div class="badges">${BADGES.map(([id,n,c])=>{const on=!!S.badges[id];return `<div class="badge ${on?'on':''}"><div class="ic">${on?icon('check'):icon('lock')}</div><b>${n}</b><small>${on?c+' · '+nice(S.badges[id]):'???'}</small></div>`}).join('')}</div>`,{},`<button class="btn ghost" data-go="mera">Wapas</button>`);
+}
+
+/* ================= KHARCHA ================= */
+async function kharcha(){
+  const now=Date.now(),dS=new Date(today()+'T00:00:00').getTime(),wS=now-7*864e5,mStr=today().slice(0,7);
+  const sum=(fn,p)=>S.spend.filter(x=>fn(x)&&(!p||x.p===p)).reduce((a,x)=>a+x.usd,0);
+  const inMonth=x=>dayStr(x.t).slice(0,7)===mStr;
+  const rM=S.rounds.filter(r=>r.d&&r.d.slice(0,7)===mStr).length;
+  const render=()=>{const B=AI.budget,cm=sum(inMonth,'claude');
+    const bar=(s,l)=>`<div class="bar"><i style="width:${Math.min(100,l?s/l*100:0)}%"></i></div>`;
+    const warn=B&&(B.claude.spent>=0.8*B.claude.limit||B.gemini.spent>=0.8*B.gemini.limit)?'<p class="note">Is mahine ka AI budget 80% ho gaya.</p>':'';
+    view(`<h1>Kharcha</h1><p class="small mute">₹ = USD × ${+S.settings.usdToInr||88} (Settings se badal sakte ho)</p>
+      <h2>Claude (game ke AI jawab)</h2><div class="grid2"><div class="kv"><div class="n">${rs(sum(x=>x.t>=dS,'claude'))}</div><div class="t">Aaj</div></div><div class="kv"><div class="n">${rs(sum(x=>x.t>=wS,'claude'))}</div><div class="t">Is hafte</div></div>
+      <div class="kv"><div class="n">${rs(cm)}</div><div class="t">Is mahine (is device)</div></div><div class="kv"><div class="n">${rM?rs(cm/rM):'–'}</div><div class="t">Per round average (${rM} rounds)</div></div></div>
+      <h2>Mahine ka budget</h2>${B?`<p class="small">Claude: ${rs(B.claude.spent)} / ${rs(B.claude.limit)} · bacha ${rs(B.claude.left)}</p>${bar(B.claude.spent,B.claude.limit)}
+      <p class="small">Gemini (Fact Factory): ${rs(B.gemini.spent)} / ${rs(B.gemini.limit)} · bacha ${rs(B.gemini.left)}</p>${bar(B.gemini.spent,B.gemini.limit)}
+      <p class="small">Google search: ${B.searches.used} / ${B.searches.free.toLocaleString('en-IN')} free (tumhari limit ${B.searches.limit})</p>${warn}`
+      :`<p class="empty">${workerUrl()?'Worker se budget nahi mila (offline ya access code galat).':'AI band hai (Worker URL nahi). Kharcha zero.'}</p>`}
+      ${AI.budgetOut?'<p class="note">Is mahine ka AI budget khatam. Game bina AI ke chalega.</p>':''}
+      <p class="hint">Budget sabke liye Worker pe hai, isliye wo saare devices ka total hai. Aaj / hafta / mahina sirf is device ka hai.</p>`,{},`<button class="btn ghost" data-go="mera">Wapas</button>`)};
+  render();await aiPing();if(screen==='kharcha')render();
+}
+
+/* ================= SETTINGS ================= */
+function syncPayload(){const s=JSON.parse(JSON.stringify(S));delete s.m4;delete s.settings;s.pending=s.pending.filter(p=>p.src!=='biz');s.checked=s.checked.filter(p=>p.src!=='biz');s.myQs=s.myQs.filter(q=>q.src!=='m4');s.bizSaved=s.bizSaved;s.cur=null;return s}
+async function syncUp(quiet){if(!S.settings.syncOn||!aiOn()&&!(workerUrl()&&S.settings.accessCode&&navigator.onLine))return;try{const {status,j}=await wfetch('/sync',{method:'PUT',body:JSON.stringify({sync_id:S.settings.syncId,state:syncPayload(),updatedAt:S.updatedAt})});if(!quiet)toast(status===200&&j.ok?'Sync ho gaya':'Sync nahi hua')}catch(e){if(!quiet)toast('Sync nahi hua')}}
+function confirmReplace(title,detail,onYes){view(`<h1>${title}</h1><p>${detail}</p><p class="note">Is device ki progress hat ke ye wali lag jaayegi. Mera Business ka data nahi chhedha jaata.</p>`,{yn:()=>go('settings'),yy:onYes},`<div class="row" style="width:100%"><button class="btn ghost" id="yn">Nahi</button><button class="btn" id="yy">Haan, lagao</button></div>`)}
+function settings(){const st=S.settings;
+  view(`<h1>Settings</h1>
+    <h2>AI</h2><p class="small mute">Worker URL aur access code. Khaali ho to AI buttons chhup jaate hain, game bina AI ke chalta hai.</p>
+    <div class="field"><label for="wu">Worker URL</label><input type="url" id="wu" placeholder="${esc(CONFIG.WORKER_URL||'https://khoj-ai.<naam>.workers.dev')}" value="${esc(st.workerUrl)}"></div>
+    <div class="field"><label for="acx">Access code</label><input type="password" id="acx" value="${esc(st.accessCode)}" autocomplete="off"></div>
+    <p class="small" id="ais">${!workerUrl()?'AI band hai.':AI.ok===false?'Access code galat hai. AI band.':AI.ok?'AI chalu hai.':'Check nahi hua.'}</p><div class="err" id="we"></div>
+    <button class="btn sm" id="ws">Save aur check karo</button>
+    <h2>Sync (phone + laptop)</h2><p class="small mute">Game ki progress Worker pe save hoti hai. Mera Business ka data kabhi sync nahi hota.</p>
+    <label class="switch"><span>Sync ON</span><input type="checkbox" id="syo" ${st.syncOn?'checked':''}></label>
+    <div class="field"><label for="syi">Sync ID (dono devices pe same, kam se kam 6 akshar)</label><input type="text" id="syi" value="${esc(st.syncId)}" maxlength="60"></div>
+    <div class="row"><button class="btn sm ghost" id="syu">Abhi upload</button><button class="btn sm ghost" id="syd">Worker se laao</button></div><div class="err" id="sye"></div>
+    <h2>Backup</h2><label class="switch"><span>Backup mein sales data bhi daalo</span><input type="checkbox" id="xs"></label>
+    <div class="row"><button class="btn sm ghost" id="ex">Backup download</button><button class="btn sm ghost" id="rs">Backup restore</button></div><input type="file" id="rf" accept="application/json,.json" hidden><div class="err" id="re"></div>
+    <h2>Feel</h2>
+    <label class="switch"><span>Haptics (vibration)</span><input type="checkbox" id="hp" ${st.haptics?'checked':''}></label>
+    <label class="switch"><span>Sound</span><input type="checkbox" id="sn" ${st.sound?'checked':''}></label>
+    <div class="tabs">${['auto','light','dark'].map(t=>`<button data-th="${t}" class="${st.theme===t?'on':''}">${t==='auto'?'Auto':t==='light'?'Light':'Dark'}</button>`).join('')}</div>
+    <h2>Reminder</h2><label class="switch"><span>Bahar ki Khoj reminder</span><input type="checkbox" id="rm" ${st.reminder?'checked':''}></label>
+    <div class="field"><label for="rt">Kitne baje?</label><input type="time" id="rt" value="${esc(st.reminderTime)}"></div><p class="hint">Sirf tab dikhta hai jab game khula ho. Default band.</p>
+    <h2>Kharcha</h2><div class="field"><label for="fx">1 USD = kitne ₹</label><input type="number" id="fx" min="1" step="0.5" value="${esc(st.usdToInr)}"></div>
+    <h2>Sab reset karo</h2><p class="mute small">XP, coins, badges, sawal, checks, Bahar ki Khoj aur sales data: sab mit jaayega.</p><div id="rz"><button class="btn sm ghost" id="r1">Reset</button></div>`,
+    {ws:async()=>{const v=$('wu').value.trim();if(v&&!/^https:\/\/|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(v)){$('we').textContent='URL https:// se shuru ho (local dev ke liye http://localhost).';return}
+       st.workerUrl=v;st.accessCode=$('acx').value.trim();AI.ok=null;AI.budgetOut=false;save();await aiPing();await loadExtra();settings()},
+     syu:()=>{if(!syncReady())return;syncUp(false)},
+     syd:async()=>{if(!syncReady())return;try{const {status,j}=await wfetch('/sync?sync_id='+encodeURIComponent(st.syncId));if(status!==200||!j.ok||!j.data){$('sye').textContent='Worker pe is Sync ID ka kuch nahi mila.';return}
+       const d=j.data;confirmReplace('Worker wali progress lagayein?',`Worker pe: ${esc(new Date(d.updatedAt).toLocaleString())}<br>Is device pe: ${esc(S.updatedAt?new Date(S.updatedAt).toLocaleString():'—')}`,()=>{const keep={settings:S.settings,m4:S.m4,pend:S.pending.filter(p=>p.src==='biz'),chk:S.checked.filter(p=>p.src==='biz'),q4:S.myQs.filter(q=>q.src==='m4')};
+         S=merge(fresh(),d.state);S.settings=keep.settings;S.m4=keep.m4;S.pending=[...S.pending,...keep.pend];S.checked=[...S.checked,...keep.chk];S.myQs=[...S.myQs,...keep.q4];save();toast('Progress lag gayi');go('home')})}catch(e){$('sye').textContent='Worker se baat nahi hui.'}},
+     ex:async()=>{const data={app:'khoj',exported:new Date().toISOString(),state:S};if($('xs').checked)data.sales=await loadSales();
+       const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='khoj-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove()},
+     rs:()=>$('rf').click(),
+     r1:()=>{$('rz').innerHTML=`<p class="note">Pakka? Ye wapas nahi aayega.</p><div class="row"><button class="btn sm ghost" id="rn">Nahi</button><button class="btn sm" id="ry">Haan, reset</button></div>`;
+       $('rn').onclick=settings;$('ry').onclick=async()=>{const keep=S.settings;S=fresh();S.settings=keep;SALES=[];await IDB.clear();save();toast('Sab reset ho gaya');go('home')}}},`<button class="btn ghost" data-go="mera">Wapas</button>`);
+  const syncReady=()=>{st.syncId=$('syi').value.trim();save();if(st.syncId.length<6){$('sye').textContent='Sync ID kam se kam 6 akshar.';return false}if(!workerUrl()||!st.accessCode){$('sye').textContent='Pehle Worker URL aur access code daalo.';return false}return true};
+  $('syo').onchange=e=>{st.syncOn=e.target.checked;st.syncId=$('syi').value.trim();save()};
+  $('rf').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{let d;try{d=JSON.parse(rd.result)}catch(x){$('re').textContent='File theek nahi.';return}if(!d||d.app!=='khoj'||!d.state){$('re').textContent='Ye Khoj ka backup nahi lagta.';return}
+    confirmReplace('Backup lagayein?',`Backup ki date: ${esc(new Date(d.exported).toLocaleString())}${d.sales?' · sales data bhi hai':''}`,async()=>{S=merge(fresh(),d.state);if(d.sales){SALES=d.sales;await IDB.set('sales',d.sales)}save();toast('Backup lag gaya');go('home')})};rd.readAsText(f)};
+  $('hp').onchange=e=>{st.haptics=e.target.checked;save();buzz(15)};
+  $('sn').onchange=e=>{st.sound=e.target.checked;save();tone('ding')};
+  $('rm').onchange=async e=>{st.reminder=e.target.checked;if(st.reminder&&'Notification' in window&&Notification.permission==='default'){try{await Notification.requestPermission()}catch(_){}}save();scheduleReminder()};
+  $('rt').onchange=e=>{st.reminderTime=e.target.value||'20:00';save();scheduleReminder()};
+  $('fx').onchange=e=>{const v=parseFloat(e.target.value);if(v>0){st.usdToInr=v;save()}};
+  document.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{st.theme=b.dataset.th;save();applyTheme();settings()});
+}
+let RT=null;
+function scheduleReminder(){clearTimeout(RT);const st=S.settings;if(!st.reminder)return;const [h,m]=(st.reminderTime||'20:00').split(':').map(Number);
+  const at=new Date();at.setHours(h,m,0,0);const ms=at-new Date();if(ms<=0||ms>864e5)return;
+  RT=setTimeout(()=>{if(S.bahar.entries[today()])return;try{if('Notification' in window&&Notification.permission==='granted')new Notification('Khoj',{body:'Bahar ki Khoj: aaj ki entry baaki hai.'})}catch(e){}if(screen==='home')home()},ms)}
+
+/* ================= ACCESS CODE (pehli baar) ================= */
+function askCode(){if(!workerUrl()||S.settings.accessCode||S.settings.codeAsked)return;const ov=$('ov');
+  ov.innerHTML=`<div class="ovc" style="text-align:left"><div class="label">AI feedback</div><h2 style="margin:0 0 6px">Access code</h2><p class="small mute">AI wale buttons ke liye code chahiye. Bina code ke bhi poora game chalta hai.</p>
+    <input type="password" id="ac1" autocomplete="off" aria-label="Access code"><div class="err" id="ace"></div><button class="btn" id="acs">Save</button><button class="link" id="acn">Abhi nahi</button></div>`;
+  ov.classList.add('on');
+  $('acn').onclick=()=>{S.settings.codeAsked=true;save();ov.classList.remove('on')};
+  $('acs').onclick=async()=>{const v=$('ac1').value.trim();if(!v){$('ace').textContent='Code likho.';return}S.settings.accessCode=v;S.settings.codeAsked=true;save();await aiPing();
+    if(AI.ok===false){$('ace').textContent='Code galat hai. AI band rahega; Settings se badal sakte ho.';return}ov.classList.remove('on');await loadExtra();rerender()}}
+
+/* ================= CARDS LOAD ================= */
+let BASE=[];
+function buildCards(){const ex=S.extraCards||{approved:[],removed:[]},map=new Map();for(const c of BASE)map.set(c.id,c);for(const c of ex.approved||[])if(c&&c.id&&Array.isArray(c.options))map.set(c.id,c);
+  const hide=new Set([...(ex.removed||[]),...S.reported.map(r=>r.id)]);CARDS=[...map.values()].filter(c=>!hide.has(c.id))}
+async function loadExtra(){if(!workerUrl()||!S.settings.accessCode||!navigator.onLine)return;try{const {status,j}=await wfetch('/facts',{},6000);if(status===200&&j.ok){S.extraCards={approved:j.approved||[],removed:j.removed||[]};save();buildCards()}}catch(e){}}
+
+/* ================= START ================= */
+applyTheme();S.level=Math.max(S.level,levelOf(S.xp));topbar();
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+addEventListener('online',()=>{aiPing().then(rerender)});addEventListener('offline',()=>rerender());
+fetch('./facts.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{BASE=j.cards||[]}).catch(()=>{FACTS_ERR=true}).finally(async()=>{buildCards();go('home');scheduleReminder();askCode();await aiPing();await loadExtra();if(screen==='home')home()});
+</script>
+</body>
+</html>

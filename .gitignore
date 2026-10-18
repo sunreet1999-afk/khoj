@@ -1,0 +1,21 @@
+# Keys aur secrets: kabhi commit nahi
+.dev.vars
+.env
+.env.*
+*.pem
+*.key
+
+# Business data: kabhi commit nahi (sirf nakli SAMPLE file allowed)
+*.csv
+*.xlsx
+*.xls
+!game/sample/SAMPLE_*.csv
+khoj-backup-*.json
+
+# Tools
+node_modules/
+.wrangler/
+.DS_Store
+
+# Local tool config
+.claude/

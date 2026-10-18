@@ -1,0 +1,20 @@
+name = "khoj-ai"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Sirf tumhara GitHub Pages domain (comma se alag kar sakte ho). localhost dev ke liye apne aap allow hai.
+ALLOWED_ORIGINS = "https://sunreet1999-afk.github.io"
+ALLOW_LOCALHOST = "true"
+# Monthly budget caps (USD). Inse upar Worker call hi nahi karta.
+CLAUDE_MONTHLY_BUDGET_USD = "0.50"
+GEMINI_MONTHLY_BUDGET_USD = "0.50"
+GEMINI_MONTHLY_SEARCH_LIMIT = "1000"
+# Fact Factory: din mein max kitne topics.
+FACTORY_DAILY_LIMIT = "20"
+
+# Saare counters, drafts, approved facts aur sync yahan.
+# `npx wrangler kv namespace create KV` chala ke mila id yahan daalo.
+[[kv_namespaces]]
+binding = "KV"
+id = "5975f86c913c436fb4114844a0fd4450"

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="hi-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Khoj Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ee;--surface:#fffdf9;--ink:#1f1c18;--mute:#6b645b;--line:#e4ded4;--acc:#a63f16;--acc-ink:#fff;--acc-soft:#f8e7dd;--good:#256b42;--good-soft:#e2f1e7;--bad:#b23a2c;--bad-soft:#f7e1dd}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161412;--surface:#1e1b18;--ink:#f0ebe3;--mute:#a59d92;--line:#2e2a25;--acc:#f08a54;--acc-ink:#1a0f08;--acc-soft:#3a2418;--good:#6cc893;--good-soft:#1c3326;--bad:#f08a7c;--bad-soft:#3a201c}}
+:root[data-theme="dark"]{--bg:#161412;--surface:#1e1b18;--ink:#f0ebe3;--mute:#a59d92;--line:#2e2a25;--acc:#f08a54;--acc-ink:#1a0f08;--acc-soft:#3a2418;--good:#6cc893;--good-soft:#1c3326;--bad:#f08a7c;--bad-soft:#3a201c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px 16px 64px}
+h1,h2{font-family:Fraunces,Georgia,serif;font-weight:600;margin:0 0 8px}
+h1{font-size:26px}h2{font-size:20px;margin-top:28px}
+section{border-top:1px solid var(--line);padding-top:8px;margin-top:20px}
+.mute{color:var(--mute)}.small{font-size:14px}
+input,textarea,select{font:inherit;color:inherit;width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:10px}
+textarea{min-height:240px;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button{font:inherit;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;cursor:pointer;font-weight:700}
+button.p{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+button[disabled]{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.item{border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;background:var(--surface)}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--line)}
+.chip.g{background:var(--good-soft);color:var(--good)}.chip.b{background:var(--bad-soft);color:var(--bad)}.chip.a{background:var(--acc-soft);color:var(--acc)}
+.ev{border-left:3px solid var(--acc);padding:4px 10px;margin:6px 0;font-size:14px}
+a{color:var(--acc);word-break:break-all}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}
+.topics label{display:flex;gap:8px;align-items:center;min-height:40px}.topics input{width:20px;height:20px}
+ol{padding-left:20px}
+</style>
+</head>
+<body><main>
+<h1>Khoj Admin</h1>
+<p class="mute small">Fact Factory, drafts aur reported cards. Token sirf is browser mein rehta hai.</p>
+<div id="login">
+  <div class="row"><input id="wu" type="url" placeholder="Worker URL (https://khoj-ai.….workers.dev)"></div>
+  <div class="row"><input id="tk" type="password" placeholder="Admin token" autocomplete="off"></div>
+  <div class="row"><button class="p" id="go">Kholo</button><span id="le" class="small" style="color:var(--bad)"></span></div>
+</div>
+<div id="app" hidden></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let URLW='',TOKEN='',INR=88,FACTS=[],TOPICS=[],BATCH=[];
+try{const g=JSON.parse(store.get('khoj_v2')||'{}');URLW=(g.settings&&g.settings.workerUrl)||'';INR=(g.settings&&g.settings.usdToInr)||88}catch(e){}
+URLW=store.get('khoj_admin_url')||URLW;$('wu').value=URLW;
+const rs=usd=>'₹'+(usd*INR).toFixed(usd*INR<1?3:2);
+async function api(path,opt={}){const r=await fetch(URLW.replace(/\/+$/,'')+path,{...opt,headers:{'content-type':'application/json','x-admin-token':TOKEN,...(opt.headers||{})}});let j=null;try{j=await r.json()}catch(e){}return {status:r.status,j:j||{}}}
+$('go').onclick=async()=>{URLW=$('wu').value.trim();TOKEN=$('tk').value.trim();if(!URLW||!TOKEN){$('le').textContent='URL aur token dono chahiye.';return}
+  const r=await api('/kharcha').catch(()=>({status:0,j:{}}));if(r.status!==200){$('le').textContent=r.status===401?'Token galat hai.':'Worker se baat nahi hui.';return}
+  store.set('khoj_admin_url',URLW);$('login').hidden=true;$('app').hidden=false;
+  try{FACTS=(await (await fetch('./facts.json',{cache:'no-store'})).json()).cards||[]}catch(e){FACTS=[]}
+  try{TOPICS=(await (await fetch('./topics.json',{cache:'no-store'})).json()).topics||[]}catch(e){TOPICS=[]}
+  render()};
+async function render(){
+  const [k,d,rp,lg]=await Promise.all([api('/kharcha'),api('/drafts'),api('/reported'),api('/factory-log')]);
+  const K=k.j,drafts=d.j.drafts||[],R=rp.j.reported||[],approved=rp.j.approved||[],removed=rp.j.removed||[],log=lg.j.log||[];
+  const pctBar=(a,b)=>`<div class="bar"><i style="width:${Math.min(100,b?a/b*100:0)}%"></i></div>`;
+  const all=[...FACTS,...approved];
+  $('app').innerHTML=`
+  <section><h2>Kharcha (${esc(K.month)})</h2>
+    <p class="small">Claude: $${(+K.claude.spent).toFixed(4)} (${rs(K.claude.spent)}) / $${K.claude.limit}</p>${pctBar(K.claude.spent,K.claude.limit)}
+    <p class="small">Gemini: $${(+K.gemini.spent).toFixed(4)} (${rs(K.gemini.spent)}) / $${K.gemini.limit}</p>${pctBar(K.gemini.spent,K.gemini.limit)}
+    <p class="small">Google search: ${K.searches.used} is mahine · tumhari limit ${K.searches.limit} · free ${K.searches.free}</p></section>
+  <section><h2>Fact Factory</h2>
+    <p class="small mute">Topics <code>topics.json</code> se. Ek batch mein max 20. Har topic pe ek Gemini call (Google Search ke saath).</p>
+    <div class="topics">${TOPICS.map((t,i)=>`<label><input type="checkbox" data-t="${i}" ${i<3?'checked':''}> ${esc(t.name)} <span class="chip">${t.mode===3?'Business':'Khoj Yatra'} · ${esc(t.category)}</span></label>`).join('')||'<p class="mute">topics.json nahi mila.</p>'}</div>
+    <div class="row"><input id="extra" placeholder="Ya ek naya topic likho (mode 1)"></div>
+    <div class="row"><button class="p" id="run">Batch chalao</button><span id="bs" class="small"></span></div>
+    <div id="bres">${BATCH.length?batchHtml():''}</div></section>
+  <section><h2>Drafts (${drafts.length})</h2>${drafts.length?'':'<p class="mute">Koi draft nahi.</p>'}${drafts.map(draftHtml).join('')}</section>
+  <section><h2>Reported (${R.length})</h2>${R.length?'':'<p class="mute">Koi report nahi.</p>'}${R.map(r=>{const c=all.slice().reverse().find(x=>x.id===r.id);return `<div class="item"><div class="row"><b>${esc(r.id)}</b><span class="chip b">${r.count} report</span><span class="small mute">${esc(r.first)} – ${esc(r.last)}</span></div>
+    ${c?`<p>${esc(c.observation)}</p><p class="small"><b>Answer:</b> ${esc(c.options[c.correct])}</p><p class="small">${esc(c.source)} ${c.source_url?`<a href="${esc(c.source_url)}" target="_blank" rel="noopener">link</a>`:''}</p>
+    <textarea id="fx_${esc(r.id)}">${esc(JSON.stringify(c,null,1))}</textarea>`:'<p class="mute">Card nahi mila.</p>'}
+    <div class="row">${c?`<button class="p" data-fix="${esc(r.id)}">Fix (JSON save)</button>`:''}<button data-rm="${esc(r.id)}">Hata do</button></div></div>`}).join('')}
+    ${removed.length?`<p class="small mute">Hataaye gaye: ${removed.map(esc).join(', ')}</p>`:''}</section>
+  <section><h2>Approved (Worker KV, ${approved.length})</h2><p class="small mute">Game facts.json ke saath inhe bhi load karta hai (id se dedupe). Hamesha ke liye facts.json mein daalna ho to JSON copy karke cards list mein jodo.</p>
+    ${approved.length?`<div class="row"><button id="cpall">Saare approved JSON copy karo</button></div>`:''}</section>
+  <section><h2>Factory log</h2>${log.slice(0,15).map(l=>`<p class="small"><span class="chip ${l.status==='draft'?'g':l.status==='rejected'?'b':''}">${esc(l.status)}</span> ${esc(l.topic)} · ${esc(l.reason||'')} · $${(+l.cost||0).toFixed(5)} · <span class="mute">${esc(l.at.slice(0,16).replace('T',' '))}</span></p>`).join('')||'<p class="mute">Abhi khaali.</p>'}</section>`;
+  $('run').onclick=runBatch;
+  document.querySelectorAll('[data-ap]').forEach(b=>b.onclick=async()=>{const id=b.dataset.ap;let card;try{card=JSON.parse($('ed_'+id).value)}catch(e){alertBox(b,'JSON theek nahi');return}
+    const r=await api('/drafts/approve',{method:'POST',body:JSON.stringify({id,card})});if(r.j.ok){await navigator.clipboard?.writeText(JSON.stringify(r.j.card,null,1)).catch(()=>{});render()}});
+  document.querySelectorAll('[data-rj]').forEach(b=>b.onclick=async()=>{await api('/drafts/reject',{method:'POST',body:JSON.stringify({id:b.dataset.rj})});render()});
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const t=$('ed_'+b.dataset.ed);t.hidden=!t.hidden});
+  document.querySelectorAll('[data-fix]').forEach(b=>b.onclick=async()=>{let card;try{card=JSON.parse($('fx_'+b.dataset.fix).value)}catch(e){alertBox(b,'JSON theek nahi');return}await api('/reported/fix',{method:'POST',body:JSON.stringify({id:b.dataset.fix,card})});render()});
+  document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{await api('/reported/remove',{method:'POST',body:JSON.stringify({id:b.dataset.rm})});render()});
+  if($('cpall'))$('cpall').onclick=()=>navigator.clipboard?.writeText(JSON.stringify(approved,null,1)).then(()=>$('cpall').textContent='Copy ho gaya');
+}
+function alertBox(el,msg){const s=document.createElement('span');s.className='small';s.style.color='var(--bad)';s.textContent=' '+msg;el.after(s)}
+function draftHtml(d){const c=d.card;return `<div class="item"><div class="row"><b>${esc(d.topic)}</b><span class="chip a">${c.mode===3?'Business':'Khoj Yatra'} · ${esc(c.category)}</span><span class="small mute">Kharcha $${(+d.cost.usd).toFixed(5)} (${rs(d.cost.usd)}) · ${d.cost.searches||0} search</span></div>
+  <p style="font-family:Fraunces,Georgia,serif;font-size:20px">${esc(c.observation)}</p>
+  <p class="small"><b>Sawal:</b> ${esc(c.question)}</p>
+  <ol class="small">${c.options.map((o,i)=>`<li>${i===c.correct?'<b>'+esc(o)+' (sahi)</b>':esc(o)}</li>`).join('')}</ol>
+  <p class="small"><b>Explanation:</b> ${esc(c.explanation)}</p><p class="small"><b>Saal:</b> ${c.saal??'—'} · <b>Source:</b> ${esc(c.source)}</p>
+  <p class="small"><b>Follow-up:</b> ${esc(c.followup_sawal)} → ${esc(c.followup_answer)}</p>
+  <p class="small"><b>Evidence (page pe mila):</b></p>${d.evidence.map(e=>`<div class="ev">"${esc(e.sentence)}"<br><span class="chip g">match ${Math.round(e.score*100)}%</span> <span class="mute">fetch ${esc(e.fetched)}</span><br><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.url)}</a></div>`).join('')}
+  ${d.grounding_urls.length?`<details><summary class="small">Google Search sources (${d.grounding_urls.length})</summary>${d.grounding_urls.map(u=>`<div class="small"><a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a></div>`).join('')}</details>`:''}
+  <textarea id="ed_${d.id}" hidden>${esc(JSON.stringify(c,null,1))}</textarea>
+  <div class="row"><button class="p" data-ap="${d.id}">Approve</button><button data-ed="${d.id}">Edit</button><button data-rj="${d.id}">Reject</button></div>
+  <p class="small mute">Approve pe card Worker ke approved list mein jaata hai aur game mein dikhne lagta hai. Card ka JSON clipboard mein bhi copy hota hai, facts.json mein jodne ke liye.</p></div>`}
+function batchHtml(){const tot=BATCH.reduce((s,b)=>s+((b.cost&&b.cost.usd)||0),0);return BATCH.map(b=>`<p class="small"><span class="chip ${b.status==='draft'?'g':b.status==='rejected'?'b':''}">${esc(b.status)}</span> ${esc(b.topic)} ${b.reason?'· '+esc(b.reason):''} ${b.cost?`· $${b.cost.usd.toFixed(5)} (${rs(b.cost.usd)})`:''}</p>`).join('')+`<p class="small"><b>Batch total:</b> $${tot.toFixed(5)} (${rs(tot)})</p>`}
+async function runBatch(){
+  const sel=[...document.querySelectorAll('[data-t]:checked')].map(x=>TOPICS[+x.dataset.t]);const ex=$('extra').value.trim();if(ex)sel.push({name:ex,mode:1,category:''});
+  if(!sel.length){$('bs').textContent='Koi topic chuno.';return}if(sel.length>20){$('bs').textContent='Ek batch mein max 20 topics.';return}
+  $('run').disabled=true;BATCH=[];const existing=FACTS.map(c=>c.observation);
+  for(let i=0;i<sel.length;i++){const t=sel[i];$('bs').textContent=`${i+1}/${sel.length}: ${t.name}...`;
+    const r=await api('/naya-card',{method:'POST',body:JSON.stringify({topic:t,existing})}).catch(()=>({status:0,j:{}}));
+    const j=r.j;BATCH.push({topic:t.name,status:j.status||(j.reason==='budget'?'budget':'error'),reason:j.reason||j.message||j.detail||j.error||'',cost:j.cost});
+    $('bres').innerHTML=batchHtml();if(j.reason==='budget'||j.reason==='factory_limit')break}
+  $('bs').textContent='Ho gaya.';$('run').disabled=false;render()}
+</script>
+</body>
+</html>

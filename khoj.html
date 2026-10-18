@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="hi-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Khoj</title>
+<style>
+:root{
+  --bg:#f5f4ef;--card:#ffffff;--ink:#1d1f24;--mute:#6a6e77;--line:#e3e1d9;
+  --acc:#2c6b5a;--acc-ink:#ffffff;--acc2:#e5f0ec;--warm:#b97a1f;--warm2:#fbf0de;
+  --bad:#a9503c;--bad2:#f7e6e1;--coin:#d9a23a;--shadow:0 1px 2px rgba(0,0,0,.05),0 6px 20px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121417;--card:#1b1e23;--ink:#ebe9e3;--mute:#9a9fa8;--line:#2c3038;
+  --acc:#6cc0a4;--acc-ink:#0f1f1a;--acc2:#1c2d28;--warm:#e2ab58;--warm2:#2d2519;
+  --bad:#e08b76;--bad2:#33211d;--coin:#e6b450;--shadow:none;
+}}
+:root[data-theme="dark"]{
+  --bg:#121417;--card:#1b1e23;--ink:#ebe9e3;--mute:#9a9fa8;--line:#2c3038;
+  --acc:#6cc0a4;--acc-ink:#0f1f1a;--acc2:#1c2d28;--warm:#e2ab58;--warm2:#2d2519;
+  --bad:#e08b76;--bad2:#33211d;--coin:#e6b450;--shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 40px}
+/* top bar */
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 16px 8px;border-bottom:1px solid var(--line)}
+.top-in{max-width:560px;margin:0 auto}
+.top-row{display:flex;align-items:center;gap:8px}
+.logo{border:0;background:none;font-weight:800;font-size:20px;letter-spacing:.5px;padding:6px 4px;cursor:pointer;color:var(--acc)}
+.lvl{font-size:13px;color:var(--mute);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700;font-size:14px}
+.coin{width:14px;height:14px;border-radius:50%;background:var(--coin);box-shadow:inset 0 -2px 0 rgba(0,0,0,.18);display:inline-block}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--acc);border-radius:6px;transition:width .6s ease}
+.bump{animation:bump .45s ease}
+@keyframes bump{40%{transform:scale(1.18)}}
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:16px;box-shadow:var(--shadow)}
+.label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:700;margin-bottom:6px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--acc2);color:var(--acc);margin-bottom:10px}
+h1{font-size:24px;margin:0 0 6px;line-height:1.25}
+h2{font-size:20px;margin:0 0 8px;line-height:1.3}
+p{margin:0 0 10px}
+.obs{font-size:21px;line-height:1.4;font-weight:600;margin:4px 0 16px}
+.obs.sm{font-size:15px;font-weight:500;color:var(--mute);margin-bottom:12px}
+.q{font-size:19px;font-weight:700;margin:0 0 14px}
+.mute{color:var(--mute)}
+.small{font-size:14px}
+.btn{display:block;width:100%;min-height:52px;border:0;border-radius:14px;background:var(--acc);color:var(--acc-ink);font-weight:700;font-size:17px;padding:12px 16px;margin-top:10px;cursor:pointer;transition:transform .1s}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.warm{background:var(--warm);color:#fff}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.opt{display:block;width:100%;text-align:left;min-height:54px;padding:12px 14px;margin-top:10px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-size:16px;line-height:1.35}
+.opt:hover{border-color:var(--acc)}
+.opt.sel{border-color:var(--acc);background:var(--acc2)}
+.opt.right{border-color:var(--acc);background:var(--acc2)}
+.opt.wrong{border-color:var(--bad);background:var(--bad2)}
+.opt .mk{float:right;font-size:12px;font-weight:700;margin-left:8px;color:var(--mute)}
+.opt.right .mk{color:var(--acc)}
+.opt.wrong .mk{color:var(--bad)}
+.opt[disabled]{cursor:default}
+textarea,input[type=text]{width:100%;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;font-size:16px;resize:vertical}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--acc)}
+textarea{min-height:84px}
+.field{margin-bottom:14px}
+.field label{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+details{margin:10px 0;border:1px dashed var(--line);border-radius:12px;padding:10px 12px}
+summary{cursor:pointer;font-weight:600;color:var(--mute);font-size:15px}
+details ul{margin:8px 0 0;padding-left:20px}
+details li{margin:4px 0}
+.hint{font-size:13px;color:var(--mute);margin-top:8px}
+.err{color:var(--bad);font-size:14px;margin-top:6px;min-height:1em}
+/* slider */
+.big{font-size:44px;font-weight:800;text-align:center;margin:6px 0 2px;color:var(--acc);font-variant-numeric:tabular-nums}
+.big-sub{text-align:center;color:var(--mute);font-size:14px;margin-bottom:10px;min-height:1.4em}
+input[type=range]{width:100%;height:44px;accent-color:var(--acc);margin:0}
+.ends{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}
+/* info boxes */
+.box{border-radius:14px;padding:14px;margin-top:12px}
+.box.good{background:var(--acc2)}
+.box.warm{background:var(--warm2)}
+.box.bad{background:var(--bad2)}
+.box b{display:block;margin-bottom:4px}
+.how{font-size:14px;border-left:3px solid var(--warm);padding:4px 0 4px 12px;margin-top:12px;color:var(--ink)}
+.how b{color:var(--warm);font-size:12px;letter-spacing:.06em;text-transform:uppercase;display:block}
+/* dots */
+.dots{display:flex;gap:5px;margin-bottom:14px}
+.dots i{height:4px;flex:1;border-radius:4px;background:var(--line)}
+.dots i.on{background:var(--acc)}
+/* home */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stat{background:var(--bg);border-radius:14px;padding:12px}
+.stat .n{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat .t{font-size:13px;color:var(--mute)}
+.mode{display:block;width:100%;text-align:left;border:0;border-radius:18px;padding:20px;margin-top:12px;cursor:pointer;background:var(--acc);color:var(--acc-ink);min-height:96px}
+.mode.alt{background:var(--card);color:var(--ink);border:1.5px solid var(--line)}
+.mode b{display:block;font-size:20px;margin-bottom:2px}
+.mode span{font-size:14px;opacity:.85}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.tile{position:relative;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:14px;min-height:64px;text-align:left;cursor:pointer;font-weight:700}
+.tile small{display:block;font-weight:500;color:var(--mute);font-size:13px}
+.count{position:absolute;top:10px;right:10px;background:var(--warm);color:#fff;border-radius:999px;font-size:12px;padding:1px 8px;font-weight:800}
+.note{font-size:13px;color:var(--warm);margin-top:6px}
+/* list items */
+.item{border-top:1px solid var(--line);padding:14px 0}
+.item:first-of-type{border-top:0;padding-top:4px}
+.item .meta{font-size:13px;color:var(--mute)}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:6px}
+.chip.g{background:var(--acc2);color:var(--acc)}
+.chip.b{background:var(--bad2);color:var(--bad)}
+.chip.w{background:var(--warm2);color:var(--warm)}
+/* badges */
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge{border:1.5px solid var(--line);border-radius:14px;padding:14px;text-align:center;min-height:120px}
+.badge .ic{width:44px;height:44px;border-radius:50%;margin:0 auto 8px;display:grid;place-items:center;font-weight:800;font-size:18px;background:var(--line);color:var(--mute)}
+.badge.on{border-color:var(--acc);background:var(--acc2)}
+.badge.on .ic{background:var(--acc);color:var(--acc-ink)}
+.badge b{display:block;font-size:15px}
+.badge small{display:block;color:var(--mute);font-size:12px;margin-top:4px}
+/* charts */
+svg{display:block;width:100%;height:auto}
+svg text{fill:var(--mute);font-size:11px;font-family:inherit}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--mute);margin-top:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+/* toasts & overlay */
+#toasts{position:fixed;left:0;right:0;bottom:16px;z-index:20;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:420px;animation:tin .25s ease}
+.toast.tb{background:var(--warm);color:#fff}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+#ov{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
+#ov.on{display:flex}
+.ovc{background:var(--card);border-radius:22px;padding:28px 22px;text-align:center;max-width:340px;width:100%;animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+.ovc .ring{width:84px;height:84px;border-radius:50%;margin:0 auto 14px;border:6px solid var(--acc);display:grid;place-items:center;font-size:30px;font-weight:800;color:var(--acc);animation:spin 1s ease}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+@keyframes spin{from{transform:rotate(-200deg)}}
+.fade{animation:fd .25s ease}
+@keyframes fd{from{opacity:0;transform:translateY(6px)}}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="top-row">
+    <button class="logo" id="tHome" aria-label="Home">Khoj</button>
+    <div class="lvl" id="tLvl"></div>
+    <span class="pill" id="tStreak" title="Streak"></span>
+    <span class="pill" id="tCoins" title="Coins"><i class="coin"></i><span></span></span>
+  </div>
+  <div class="bar" aria-hidden="true"><i id="tBar"></i></div>
+</div></header>
+<main class="wrap" id="app"></main>
+<div id="toasts" aria-live="polite"></div>
+<div id="ov" role="dialog" aria-modal="true"></div>
+
+<script>
+/* ============ CONTENT: sirf asli, check kiye ja sakne wale facts ============ */
+const CAT={khaana:'Khaana',business:'Business',science:'Science',itihaas:'Itihaas',jaanwar:'Jaanwar',roz:'Roz ki zindagi',india:'India'};
+const F=[
+{cat:'khaana',obs:'Misr ki hazaaron saal purani kabron mein archaeologists ko shahad ke bartan mile. Shahad kharab nahi hua tha.',
+ ex:['Shahad kharab kyun nahi hota?','Koi khaana hazaaron saal kaise tik sakta hai?'],
+ q:'Shahad itne saal kharab kyun nahi hua?',
+ o:['Usme koi preservative milaya gaya tha','Usme paani bahut kam aur acid zyada hai, bacteria badh nahi paate','Kabr mein bilkul hawa nahi thi','Wo shahad nahi, mom (wax) tha'],a:1,
+ why:'Shahad mein sirf ~17% paani hai aur wo acidic hai (pH ~3.9). Bacteria ka paani shahad kheench leta hai, wo badh nahi paate.',
+ how:'Lab mein shahad ki water activity aur pH naapi gayi, aur bacteria daal ke dekha gaya ki wo badhte hain ya nahi.',
+ fq:'Phir bhi doctor 1 saal se chhote bachche ko shahad dene se mana kyun karte hain?',
+ fo:['Bahut meetha hai, daant kharab honge','Usme botulism bacteria ke spores ho sakte hain jo bachche ki aant mein badh jaate hain','Har bachche ko allergy hoti hai','Shahad pachta hi nahi'],fa:1,
+ fwhy:'Spores shahad mein zinda reh sakte hain, bas badhte nahi. Badon ki aant unhe rok leti hai, chhote bachche ki nahi.',
+ fhow:'Infant botulism ke case records (CDC, 1970s se) mein kai bimaar bachchon ko shahad diya gaya tha.'},
+
+{cat:'khaana',obs:'Leh (lagbhag 3500 m) mein paani jaldi ubal jaata hai, phir bhi daal-chawal pakne mein kaafi zyada time lagta hai.',
+ ex:['Paani jaldi ubal ke bhi khaana der se kyun pakta hai?','Oonchaai paani ko kaise badalti hai?'],
+ q:'Paani jaldi ubalta hai, phir bhi khaana der se kyun pakta hai?',
+ o:['Wahan ka paani bhaari hai','Kam hawa ke dabaav mein paani ~88°C pe hi ubal jaata hai, khaane ko kam garmi milti hai','Thand se bartan garam hi nahi hota','Wahan ki daal alag kism ki hai'],a:1,
+ why:'Paani ka boiling point hawa ke dabaav pe tika hai. Upar dabaav kam hai, to paani 100°C se pehle ubalta hai aur usse zyada garam nahi hota.',
+ how:'Boiling point aur pressure ka rishta lab mein naapa gaya hai. 3500 m pe ye lagbhag 88-89°C aata hai.',
+ fq:'Pressure cooker khaana jaldi kaise pakata hai?',
+ fo:['Bhaap khaane ke andar ghus jaati hai','Dabaav badha ke paani ka boiling point ~120°C tak le jaata hai','Seeti se garmi badhti hai','Bas dhakkan band hai, aur kuch nahi'],fa:1,
+ fwhy:'Cooker andar ka dabaav lagbhag doguna kar deta hai. Paani 120°C tak garam ho paata hai, to khaana tez pakta hai.',
+ fhow:'Cooker ke andar thermometer aur pressure gauge se naapa gaya: ~1 bar extra dabaav pe ~120°C.'},
+
+{cat:'khaana',obs:'Saabut pyaaz soonghne pe aansu nahi aate. Chaaku lagte hi aate hain.',
+ ex:['Kaatne pe hi aansu kyun aate hain?','Pyaaz ka asar aankh tak kaise pahunchta hai?'],
+ q:'Pyaaz kaatne pe hi aansu kyun aate hain?',
+ o:['Ras ki boondein udke aankh mein jaati hain','Cells tootne pe ek enzyme udne waali gas banata hai jo aankh tak pahunchti hai','Chaaku ka metal pyaaz se react karta hai','Bas pyaaz ki khushboo tez hai'],a:1,
+ why:'Saabut pyaaz mein chemicals alag-alag band rehte hain. Kaatne pe wo milte hain aur ek enzyme ek gas banata hai jo aankh ko chubhti hai.',
+ how:'2002 mein Japan ke scientists (Imai et al.) ne Nature journal mein wo enzyme dhoondh ke chhapa.',
+ fq:'Pyaaz pakaane ke baad meetha kyun lagne lagta hai?',
+ fo:['Garmi teekhe sulfur chemicals tod deti hai, andar ki sugar mehsoos hoti hai','Tel mein sugar hoti hai','Pyaaz garmi mein paani sokh leta hai','Namak ki wajah se'],fa:0,
+ fwhy:'Pyaaz mein pehle se kaafi sugar hai. Garmi teekhe sulfur compounds tod deti hai aur sugar caramelize hone lagti hai.',
+ fhow:'Kachche aur pake pyaaz ka chemical analysis karke sulfur compounds aur sugar naape gaye.'},
+
+{cat:'business',obs:'Kai mehenge restaurants menu pe "₹450" nahi, sirf "450" likhte hain.',
+ ex:['Menu se ₹ ka nishaan kyun hataate hain?','Nishaan hatane se kharch pe kaise asar padta hai?'],
+ q:'Menu se ₹ ka sign kyun hataate hain?',
+ o:['Design saaf dikhta hai, aur kuch nahi','₹ dekh ke paise kharch hone ki feeling aati hai; bina nishaan log zyada kharch karte hain','Tax ke kisi niyam ki wajah se','Foreign customers ke liye'],a:1,
+ why:'Currency ka nishaan dimaag ko "paisa ja raha hai" yaad dilata hai. Sirf number dekh ke log thoda zyada kharch karte paaye gaye.',
+ how:'Cornell University ki 2009 study: ek restaurant mein alag-alag menu diye gaye; bina currency nishaan wale menu pe log zyada kharch kiye.',
+ fq:'Dukaanon mein "₹99" jaisi keemat kyun hoti hai, "₹100" kyun nahi?',
+ fo:['Change dena aasan hai','Dimaag pehla digit zyada dekhta hai; 99 "90-kuch" lagta hai','GST ka hisaab','Bas purani aadat, koi asar nahi'],fa:1,
+ fwhy:'Hum number baayein se padhte hain aur pehle digit pe zyada dhyaan dete hain. Isliye ek rupaya kam bhi kaafi sasta lagta hai.',
+ fhow:'Thomas aur Morwitz (2005) ke experiments mein log .99 wali keemat ko kaafi sasta samjha, jab pehla digit badla.'},
+
+{cat:'india',obs:'Mumbai ke dabbawale roz lagbhag 2 lakh dabbe ghar se office aur wapas pahunchaate hain. Bina app, bina computer.',
+ ex:['Bina computer itne dabbe sahi jagah kaise pahunchte hain?','Dabba kabhi badalta kyun nahi?'],
+ q:'Sahi dabba sahi office tak kaise pahunchta hai?',
+ o:['Har dabbe pe GPS tag','Dabbe pe rang aur number ka chhota code: station, building, floor','Har dabbawala sirf ek ghar ka dabba le jaata hai','Office wale khud station se utha lete hain'],a:1,
+ why:'Dhakkan ke code se pata chalta hai kahan se uthaana, kis station pe utaarna, kaunsi building aur floor. Sab local train ke time pe chalta hai.',
+ how:'Harvard Business School ne 2010 mein is system pe case study likhi, dabbawalon ke kaam ko step by step dekh ke.',
+ fq:'Ye system kitna purana hai?',
+ fo:['Lagbhag 30 saal','Lagbhag 75 saal','130 saal se zyada','Lagbhag 15 saal'],fa:2,
+ fwhy:'Ye kaam 1890 ke aas-paas shuru hua, jab Bombay mein office jaane waalon ko ghar ka khaana chahiye tha.',
+ fhow:'Dabbawala association ke itihaas mein Mahadeo Havaji Bachche ka naam 1890 ke saath record mein hai.'},
+
+{cat:'science',obs:'NASA ke Curiosity rover ne Mars pe sunset ki photo li. Wahan sunset blue tha.',
+ ex:['Mars pe sunset blue kyun hota hai?','Earth pe red aur Mars pe blue kaise?'],
+ q:'Mars pe sunset blue kyun dikhta hai?',
+ o:['Mars ka suraj blue dikhta hai','Mars ki dhool ke chhote particles blue light ko suraj ki disha mein hi aage bhejte hain','Camera ki galti thi','Wahan ki hawa mein bahut paani hai'],a:1,
+ why:'Mars ki hawa patli hai par dhool bahut hai. Dhool ke particles ek khaas size ke hain jo blue light ko suraj ke aas-paas hi bikherte hain.',
+ how:'Curiosity ne April 2015 mein Gale crater se ye photos li. Dhool ke particles ka size rover aur orbiter se naapa gaya.',
+ fq:'To Earth pe din mein aasmaan blue kyun hai?',
+ fo:['Samundar ka rang upar dikhta hai','Hawa ke molecules blue light ko red se zyada bikherte hain','Ozone ka rang blue hai','Sirf aankh ka bhram hai'],fa:1,
+ fwhy:'Chhoti wavelength (blue) hawa se zyada bikharti hai, to har taraf se blue light aati hai. Sunset pe blue raaste mein bikhar jaati hai, red bachti hai.',
+ fhow:'Lord Rayleigh ne 1871 mein iska hisaab nikala; baad ki measurements ne use sahi paaya.'},
+
+{cat:'science',obs:'Tumhare body mein lagbhag 38 lakh crore bacteria hain. Tumhare apne cells se thode zyada.',
+ ex:['Body mein itne bacteria kaise jee lete hain?','Ye bacteria body mein kahan rehte hain?'],
+ q:'Inme se zyada tar bacteria body mein kahan rehte hain?',
+ o:['Skin pe','Muh mein','Badi aant (colon) mein','Khoon mein'],a:2,
+ why:'Lagbhag saare bacteria badi aant mein hain. Wahan khaana dheere chalta hai aur unhe khaana milta rehta hai.',
+ how:'2016 mein Sender, Fuchs aur Milo ne aant ka volume aur bacteria density naap ke hisaab lagaya (PLOS Biology).',
+ fq:'Pehle kaha jaata tha bacteria hamare cells se 10 guna hain. Wo number kahan se aaya?',
+ fo:['Ek purane mote andaaze se jo theek se check nahi hua','Microscope se gin ke','Sirf bachchon ka data tha','Ek printing galti se'],fa:0,
+ fwhy:'1970s ke ek rough andaaze ko log saalon quote karte rahe. Dobara hisaab hua to ratio lagbhag 1.3 : 1 nikla.',
+ fhow:'Sender et al. (2016) ne 10:1 claim ka source (Luckey, 1972) dhoondha aur naye data se dobara calculate kiya.'},
+
+{cat:'itihaas',obs:'Cleopatra ka zamana Great Pyramid banne se zyada, Chaand pe insaan ke pahunchne ke paas tha.',
+ ex:['Ye kaise ho sakta hai?','Pyramid kitna purana hai?'],
+ q:'Ye kaise possible hai?',
+ o:['Pyramid Cleopatra ne hi banwaya tha','Misr (Egypt) ki civilization 3000 saal chali: pyramid shuru mein bana, Cleopatra aakhir mein thi','Pyramid asal mein naya hai','Cleopatra ki date galat likhi gayi'],a:1,
+ why:'Great Pyramid ~2560 BCE mein bana. Cleopatra ki maut 30 BCE mein hui. Chaand landing 1969. Pehla gap ~2500 saal, doosra ~2000.',
+ how:'Pyramid ke mortar ki radiocarbon dating aur Roman records se dono dates pakki hain.',
+ fq:'Great Pyramid kis liye bana tha?',
+ fo:['Anaaj rakhne ka godown','Raja (pharaoh) Khufu ki kabr','Taare dekhne ki jagah','Mandir'],fa:1,
+ fwhy:'Ye pharaoh Khufu ki kabr thi. Andar ke chamber mein granite ka bada taboot (sarcophagus) hai.',
+ fhow:'Andar ke chambers mein mazdooron ne Khufu ka naam likha tha. Wadi al-Jarf mein pathar dhone waale ek afsar ki diary bhi mili.'},
+
+{cat:'itihaas',obs:'Shatranj ki "Queen" pehle board ke sabse kamzor mohron mein se ek thi.',
+ ex:['Queen itni taakatwar kaise bani?','Mohron ki chaal kyun badli?'],
+ q:'Shuru mein Queen asal mein kya thi?',
+ o:['Raja ki beti','Raja ka mantri (wazir), jo sirf 1 khana diagonal chalta tha','Ek sipahi','Haathi'],a:1,
+ why:'India ke chaturanga aur Persian shatranj mein ye mohra mantri tha. Wo bas ek khana diagonal chal sakta tha.',
+ how:'Purani Persian aur Arabic shatranj ki kitaabon mein mohron ki chaal likhi mili hai.',
+ fq:'Queen ko aaj wali taakat kab mili?',
+ fo:['~600 CE, India mein','~1475-1500, Spain ke aas-paas','~1850, England mein','~1950, Russia mein'],fa:1,
+ fwhy:'1400s ke aakhir mein naye rules aaye aur khel bahut tez ho gaya. Ye rules jaldi poore Europe mein phail gaye.',
+ fhow:'Lucena ki 1497 ki chess kitaab aur Valencia ki ek kavita (~1475) mein nayi Queen ki chaal likhi mili.'},
+
+{cat:'jaanwar',obs:'Octopus ke teen dil hote hain aur uska khoon blue hota hai.',
+ ex:['Octopus ka khoon blue kyun hai?','Teen dil kis kaam aate hain?'],
+ q:'Octopus ka khoon blue kyun hota hai?',
+ o:['Usme copper wala protein (hemocyanin) oxygen dhota hai','Samundar ka paani khoon mein milta hai','Usme iron zyada hai','Thande paani ki wajah se'],a:0,
+ why:'Hamare khoon mein iron wala hemoglobin hai jo red hai. Octopus mein copper wala hemocyanin hai, jo oxygen ke saath blue dikhta hai.',
+ how:'Octopus ke khoon ke chemical analysis se protein aur usme copper pehchana gaya.',
+ fq:'Teen mein se ek dil tairte waqt kya karta hai?',
+ fo:['Aur tez dhadakta hai','Ruk jaata hai','Sirf dimaag ko khoon bhejta hai','Kuch nahi badalta'],fa:1,
+ fwhy:'Do dil gills ko khoon bhejte hain, teesra baaki body ko. Tairte waqt teesra ruk jaata hai, isliye octopus aksar rengna pasand karta hai.',
+ fhow:'Tairte aur rengte octopus ki dhadkan ki measurements (Wells, 1970s-80s) mein ye dekha gaya.'},
+
+{cat:'jaanwar',obs:'Seattle mein scientists ne ek khaas nakaab pehen ke kuch kauve pakde. Saalon baad bhi kauve us nakaab ko dekh ke chillaate the.',
+ ex:['Kauve chehra kaise yaad rakhte hain?','Kauve ek doosre ko khatra kaise batate hain?'],
+ q:'Jo kauve kabhi pakde hi nahi gaye, unhone kya kiya?',
+ o:['Kuch nahi, unhe pata hi nahi tha','Wo bhi chillaane lage, doosre kauvon se seekh liya','Darr ke shahar chhod diya','Nakaab wale se khaana maangne aaye'],a:1,
+ why:'Kauve chehra yaad rakhte hain aur "khatra" doosron ko sikha dete hain. Baad mein paida hue kauve bhi chillaane lage.',
+ how:'University of Washington (John Marzluff) ki study: 2006 se saalon tak nakaab pehen ke ghoome aur chillaane waale kauve gine.',
+ fq:'New Caledonia ke kauve lab mein kya karte dikhe?',
+ fo:['Taar mod ke hook banaya aur khaana nikaala','1000 tak ginti ki','Andhere mein dekh paaye','Kuch khaas nahi'],fa:0,
+ fwhy:'Oxford lab mein Betty naam ki kauvi ne seedha taar mod ke hook banaya aur tube se khaane ki baalti nikaali.',
+ fhow:'2002 mein Science journal mein video ke saath ye experiment chhapa (Weir, Chappell, Kacelnik).'},
+
+{cat:'roz',obs:'Ek doctor ne 60 saal tak sirf baayein haath ki ungliyaan chatkaayin, daayein ki kabhi nahi.',
+ ex:['Ungli chatkaane se haath ko kya hota hai?','Chatak ki awaaz kyun aati hai?'],
+ q:'60 saal baad kya nikla?',
+ o:['Baayein haath mein arthritis','Dono haathon mein koi farq nahi','Baayaan haath zyada mazboot','Daayein haath mein arthritis'],a:1,
+ why:'Dono haathon mein arthritis nahi mila. Badi studies mein bhi ungli chatkaane aur arthritis ka seedha rishta nahi mila.',
+ how:'Dr. Donald Unger ne 1998 mein journal Arthritis & Rheumatism mein apna result chhapa.',
+ fq:'"Chatak" ki awaaz kahan se aati hai?',
+ fo:['Haddi ke ragadne se','Joint ke liquid mein achanak gas ki khaali jagah banne se','Nas khinchne se','Muscle ke jhatke se'],fa:1,
+ fwhy:'Joint khinchne pe andar ka dabaav girta hai aur liquid mein achanak gas ki jagah banti hai. Wahi "chatak" hai.',
+ fhow:'2015 mein Canada ke scientists ne MRI mein real time ungli chatakti dekhi (Kawchuk et al., PLOS ONE).'},
+
+{cat:'science',obs:'Kela thoda sa radioactive hota hai.',
+ ex:['Kela radioactive kaise ho sakta hai?','Kya roz kela khaana theek hai?'],
+ q:'Kela radioactive kyun hota hai?',
+ o:['Pesticide ki wajah se','Usme potassium hai, aur natural potassium ka chhota hissa (K-40) radioactive hai','Mitti ke uranium se','Dhoop se'],a:1,
+ why:'Har potassium ka lagbhag 0.012% hissa K-40 hota hai. Kele mein potassium zyada hai, to thodi si radiation.',
+ how:'Gamma spectrometry se kele aur doosre khaane ki radiation naapi gayi hai.',
+ fq:'Bahut kele khaane se radiation body mein jama hoti hai?',
+ fo:['Haan, dheere-dheere jama hoti hai','Nahi, body potassium ka level fix rakhti hai, extra bahar nikal jaata hai','Sirf bachchon mein','Haan, agar kela pakka ho'],fa:1,
+ fwhy:'Body potassium ka level lagbhag fix rakhti hai; extra kidney bahar nikaal deti hai. Isliye K-40 jama nahi hota.',
+ fhow:'Whole-body counters se insaan ke andar ka potassium naapa gaya; wo khaane se lagbhag nahi badalta.'},
+
+{cat:'india',obs:'Assam ke kai chai bagaan apni ghadi IST se 1 ghanta aage rakhte hain. Ise "Bagan time" kehte hain.',
+ ex:['Ek desh mein do time kyun?','Ghadi aage karne se kya fayda?'],
+ q:'Ye bagaan ghadi 1 ghanta aage kyun rakhte hain?',
+ o:['British ne London ke time se joda tha','Wahan suraj IST ke hisaab se kaafi jaldi ugta aur doobta hai; din ki roshni bachti hai','Factory machines ke liye','Kisi ki galti chalti aa rahi hai'],a:1,
+ why:'IST 82.5°E longitude se tay hai. Assam kaafi poorab mein hai, to wahan suraj lagbhag ek ghanta pehle ugta hai.',
+ how:'Sunrise ke records aur longitude ke hisaab se ye farq naapa gaya. Bagan time British zamane se chal raha hai.',
+ fq:'IST kis jagah ke time pe tika hai?',
+ fo:['Delhi','82.5°E longitude, Mirzapur (UP) ke paas','Mumbai','Kolkata'],fa:1,
+ fwhy:'IST ki reference line 82.5°E hai, jo UP mein Mirzapur ke paas se guzarti hai, desh ke beech ke aas-paas.',
+ fhow:'CSIR-NPL (National Physical Laboratory, Delhi) atomic ghadiyon se IST chalati hai, isi longitude ke hisaab se.'},
+
+{cat:'khaana',obs:'500 saal pehle Bharat ke khaane mein laal-hari mirch thi hi nahi.',
+ ex:['Mirch Bharat kaise pahunchi?','Pehle khaana teekha kaise banta tha?'],
+ q:'To pehle teekha kis se banta tha?',
+ o:['Kaali mirch aur pippali (long pepper)','Sirf adrak','Pyaaz','Teekha khaana hota hi nahi tha'],a:0,
+ why:'Mirch America se aayi; Portuguese 1500s mein Goa laaye. Usse pehle kaali mirch aur pippali teekhapan deti thi.',
+ how:'Genetics aur archaeology se mirch ka ghar Mexico-South America nikla. Purani Indian recipes mein kaali mirch hai, mirch nahi.',
+ fq:'Mirch khaane pe "jalan" kyun lagti hai?',
+ fo:['Wo sach mein garam hoti hai','Capsaicin wahi sensor (TRPV1) jagaata hai jo garmi pe jaagta hai','Acid se chhote zakhm hote hain','Namak ki wajah se'],fa:1,
+ fwhy:'Capsaicin jeebh ka garmi waala sensor on kar deta hai. Dimaag ko lagta hai jal raha hai, temperature nahi badalta.',
+ fhow:'David Julius ki team ne 1997 mein TRPV1 dhoondha. Is kaam ke liye 2021 ka Nobel mila.'},
+
+{cat:'science',obs:'New York ki Empire State Building pe saal mein lagbhag 20-25 baar bijli girti hai.',
+ ex:['Bijli ek hi jagah baar baar kyun girti hai?','Bijli girne ki jagah kaise tay hoti hai?'],
+ q:'Bijli ek hi building pe baar-baar kyun girti hai?',
+ o:['Building mein magnet hai','Wo bahut oonchi hai; bijli ko zameen tak sabse easy raasta wahi deti hai','Wahan baarish zyada hoti hai','Lightning rod doosre shehron ki bijli kheenchti hai'],a:1,
+ why:'Bijli aksar sabse oonchi conducting cheez pe girti hai. "Ek jagah do baar nahi girti" wali baat galat hai.',
+ how:'1930s se building pe strikes record kiye gaye (General Electric ki measurements); aaj lightning detection networks ginte hain.',
+ fq:'Chamak ke baad garaj der se kyun sunai deti hai?',
+ fo:['Garaj baad mein banti hai','Roshni awaaz se lakhon guna tez chalti hai','Baadal awaaz rok lete hain','Kaan dheere sunte hain'],fa:1,
+ fwhy:'Dono saath bante hain. Awaaz ~1 km 3 second mein chalti hai, roshni lagbhag turant pahunch jaati hai.',
+ fhow:'Hawa mein awaaz ki speed (~343 m/s) baar-baar naapi gayi hai.'},
+
+{cat:'business',obs:'Ek hi strawberry mousse safed plate pe kaali plate se zyada meetha laga.',
+ ex:['Plate ka rang taste kaise badalta hai?','Restaurant plate ka rang kyun soch ke chunte hain?'],
+ q:'Safed plate pe mousse zyada meetha kyun laga?',
+ o:['Safed plate zyada saaf lagti hai','Dimaag rang aur contrast se taste ka andaaza lagaata hai','Kaali plate garam ho jaati hai','Safed plate mein zyada mousse tha'],a:1,
+ why:'Taste sirf jeebh nahi, dimaag ka andaaza bhi hai. Rang aur contrast us andaaze ko badal dete hain.',
+ how:'Oxford ki Crossmodal lab (2012): logon ne dono plates pe same mousse chakha; safed pe ~10% zyada meetha bataaya.',
+ fq:'Kya music bhi taste badal sakta hai?',
+ fo:['Nahi, bilkul nahi','Haan, oonche sur cheez ko zyada meetha aur bhaari sur kadwa lagwa sakte hain','Sirf tez awaaz se','Sirf bachchon mein'],fa:1,
+ fwhy:'Experiments mein same toffee oonche, halke suron ke saath meethi aur bhaari suron ke saath kadwi lagi.',
+ fhow:'Oxford ke Crisinel aur Spence ki 2012 study, "bittersweet symphony" naam se chhapi.'},
+
+{cat:'jaanwar',obs:'Ullu apni gardan lagbhag 270° ghuma leta hai. Phir bhi dimaag ka khoon band nahi hota.',
+ ex:['Ullu gardan itni kaise ghumata hai?','Khoon kyun nahi rukta?'],
+ q:'Gardan itni ghuma ke bhi khoon kaise nahi rukta?',
+ o:['Uski gardan mein haddi nahi','Gardan mein 14 haddiyan aur naso mein khoon jama rakhne ki jagah','Wo us waqt saans rok leta hai','Ullu ke dimaag ko khoon nahi chahiye'],a:1,
+ why:'Insaan ki gardan mein 7 haddiyan, ullu mein 14. Naso mein khaas jagah hai jahan khoon jama rehta hai jab gardan mudti hai.',
+ how:'Johns Hopkins ke scientists ne 2013 mein ullu ki naso mein dye daal ke X-ray (angiography) se dekha.',
+ fq:'Ullu ko gardan ghumani hi kyun padti hai?',
+ fo:['Aankhen tube jaisi hain aur socket mein fix, ghoom nahi sakti','Wo bore ho jaata hai','Sirf sunne ke liye','Bas aadat hai'],fa:0,
+ fwhy:'Ullu ki aankhen gol nahi, lambi tube jaisi hain aur socket mein fit hain. Dekhne ke liye poora sir ghumana padta hai.',
+ fhow:'Ullu ki aankh aur khopdi ki anatomy studies se.'}
+];
+F.forEach((f,i)=>f.id=i);
+
+/* ============ STATE ============ */
+const LS='khoj_v1';
+const LV=[['Andaazebaaz',0],['Sawaali',100],['Khojii',300],['Jaasoos',600],['Vaigyanik',1000],['Khoj Guru',1500]];
+const BADGES=[
+ ['pehla','Pehla Sawal','Pehla khud ka sawal likha'],
+ ['galat5','Galat Aur Khush','5 galat guesses ke baad answer khole'],
+ ['doosra','Doosra Socha','Pehla guess galat, doosra sahi nikla'],
+ ['chain3','Chain Reaction','Ek hi topic pe 3 chain round'],
+ ['zameen','Zameen Pe','3 Asli Duniya checks poore kiye'],
+ ['imaan','Imaandaar Yakeen','10+ guesses ke baad calibration 80 se upar'],
+ ['kyun10','Kyun Ka Raja','10 "kyun/kaise" sawal likhe'],
+ ['khula','Khula Dimaag','Khule Sawal mein 5 sawal, unme se 2 baad mein khole']
+];
+function fresh(){return{coins:5,xp:0,level:0,streak:0,lastDay:null,seen:[],rounds:[],guesses:[],khule:[],pending:[],checked:[],badges:{},
+ st:{ownQ:0,kyunQ:0,wrongOpen:0,chain:{},checks:0,khuleTotal:0,khuleOpened:0,doosraSahi:0},done:0,lastTestAt:0,testQ:[],cur:null,test:null,theme:'auto',nid:1}}
+let S=null;
+try{S=JSON.parse(localStorage.getItem(LS))}catch(e){S=null}
+if(!S||typeof S!=='object')S=fresh();else{const d=fresh();S=Object.assign(d,S);S.st=Object.assign(fresh().st,S.st||{})}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+
+/* ============ HELPERS ============ */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function dayStr(t){const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const today=()=>dayStr(Date.now());
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function nice(ds){if(!ds)return'';const [y,m,d]=ds.split('-');return +d+' '+MON[+m-1]}
+function daysAgo(ds){const a=new Date(ds+'T00:00:00'),b=new Date(today()+'T00:00:00');const n=Math.round((b-a)/864e5);return n<=0?'aaj':n===1?'kal':n+' din pehle'}
+function levelOf(x){let l=0;LV.forEach((v,i)=>{if(x>=v[1])l=i});return l}
+function streakNow(){if(!S.lastDay)return 0;const y=dayStr(Date.now()-864e5);return(S.lastDay===today()||S.lastDay===y)?S.streak:0}
+function tick(){const t=today();if(S.lastDay===t)return;const y=dayStr(Date.now()-864e5);S.streak=S.lastDay===y?S.streak+1:1;S.lastDay=t}
+function calib(){const g=S.guesses;if(!g.length)return null;let b=0;g.forEach(x=>{const p=x.c/100,o=x.ok?1:0;b+=(p-o)*(p-o)});return Math.round(100*(1-b/g.length))}
+function overconf(){const hi=S.guesses.filter(x=>x.c>=70);if(hi.length<3)return false;const acc=hi.filter(x=>x.ok).length/hi.length;const avg=hi.reduce((s,x)=>s+x.c,0)/hi.length/100;return acc<avg-0.2}
+function isKyun(t){return /^(kyun|kyon|kyu|kyoon|kaise|kaisa|kese|why|how)\b/i.test(t.trim())&&t.trim().split(/\s+/).length>=4}
+
+function toast(msg,cls){const el=document.createElement('div');el.className='toast'+(cls?' '+cls:'');el.textContent=msg;const box=$('toasts');box.appendChild(el);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>el.remove(),cls==='tb'?3600:2200)}
+function bump(el){if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
+
+function gain(c,x,why){
+  if(c)S.coins=Math.max(0,S.coins+c);
+  if(x)S.xp+=x;
+  if(c||x){const parts=[];if(x)parts.push('+'+x+' XP');if(c)parts.push((c>0?'+':'')+c+' coin');toast(parts.join(' · ')+(why?'  ·  '+why:''))}
+  const nl=levelOf(S.xp);if(nl>S.level){S.level=nl;levelUp(nl)}
+  checkBadges();save();topbar(c?'coin':null);
+}
+function checkBadges(){const s=S.st,cb=calib();
+  const ok={pehla:s.ownQ>=1,galat5:s.wrongOpen>=5,doosra:s.doosraSahi>=1,chain3:Object.values(s.chain).some(v=>v>=3),zameen:s.checks>=3,
+    imaan:S.guesses.length>=10&&cb!==null&&cb>80,kyun10:s.kyunQ>=10,khula:s.khuleTotal>=5&&s.khuleOpened>=2};
+  BADGES.forEach(([id,n])=>{if(ok[id]&&!S.badges[id]){S.badges[id]=today();toast('Naya badge: '+n,'tb')}});save()}
+function levelUp(l){const nx=LV[l+1];const ov=$('ov');
+  ov.innerHTML=`<div class="ovc"><div class="ring">${l+1}</div><div class="label">Level up</div><h2>${LV[l][0]}</h2>
+  <p class="mute small">${nx?'Agla: '+nx[0]+' ('+nx[1]+' XP)':'Sabse ooncha level. Khoj jaari rakho.'}</p><button class="btn" id="ovOk">Aage</button></div>`;
+  ov.classList.add('on');const close=()=>ov.classList.remove('on');$('ovOk').onclick=close;ov.onclick=e=>{if(e.target===ov)close()}}
+
+function topbar(flash){
+  const l=levelOf(S.xp),cur=LV[l][1],nx=LV[l+1];
+  $('tLvl').textContent=LV[l][0]+' · '+S.xp+' XP';
+  $('tBar').style.width=(nx?Math.min(100,(S.xp-cur)/(nx[1]-cur)*100):100)+'%';
+  $('tCoins').querySelector('span').textContent=S.coins;
+  $('tStreak').textContent=streakNow()+' din';
+  if(flash==='coin')bump($('tCoins'));
+}
+function applyTheme(){const r=document.documentElement;if(S.theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',S.theme)}
+
+/* ============ ROUTER ============ */
+const app=$('app');
+function view(html,on){app.innerHTML='<div class="fade">'+html+'</div>';window.scrollTo(0,0);
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  if(on)for(const k in on){const el=$(k);if(el)el.onclick=on[k]}topbar()}
+let screen='home';
+function go(s){screen=s;({home,yatra,asli,khule,pending,pattern,badges,settings,test}[s]||home)()}
+$('tHome').onclick=()=>go('home');
+
+/* ============ HOME ============ */
+function home(){
+  const l=levelOf(S.xp),nx=LV[l+1],cb=calib(),pc=S.pending.length,kc=S.khule.length,bc=Object.keys(S.badges).length;
+  const left=F.length-S.seen.length;
+  view(`<div class="card">
+    <div class="label">Level ${l+1}</div><h1>${LV[l][0]}</h1>
+    <p class="mute small">${nx?(nx[1]-S.xp)+' XP aur, phir '+nx[0]:'Sabse ooncha level'}</p>
+    <div class="stats">
+      <div class="stat"><div class="n">${S.coins}</div><div class="t">Coins</div></div>
+      <div class="stat"><div class="n">${streakNow()}</div><div class="t">Din ki streak</div></div>
+      <div class="stat"><div class="n">${cb===null?'–':cb}</div><div class="t">Calibration score</div></div>
+      <div class="stat"><div class="n">${S.guesses.length}</div><div class="t">Check hue guesses</div></div>
+    </div>
+    ${overconf()?'<p class="note">Pakke guesses aksar galat nikle.</p>':''}
+  </div>
+  <button class="mode" id="hY"><b>Khoj Yatra</b><span>${S.cur?'Chal raha round jaari rakho':left>0?left+' asli observations baaki':'Saare observations dekh liye'}</span></button>
+  <button class="mode alt" id="hA"><b>Asli Duniya</b><span>Apne aas-paas ka andaaza. Reality pe check.</span></button>
+  <div class="grid">
+    <button class="tile" data-go="pending">Pending Checks<small>Asli Duniya</small>${pc?`<span class="count">${pc}</span>`:''}</button>
+    <button class="tile" data-go="khule">Khule Sawal<small>Chhode hue</small>${kc?`<span class="count">${kc}</span>`:''}</button>
+    <button class="tile" data-go="pattern">Mera Pattern<small>Yakeen vs ichha</small></button>
+    <button class="tile" data-go="badges">Badges<small>${bc}/${BADGES.length}</small></button>
+    <button class="tile" data-go="settings" style="grid-column:1/-1">Settings</button>
+  </div>`,{hY:()=>go('yatra'),hA:()=>go('asli')});
+}
+
+/* ============ KHOJ YATRA ============ */
+const STEPS=['notice','sawal','guess','yakeen','doosra','ichha','decide','reveal','gap'];
+function dots(step){const i=STEPS.indexOf(step);return '<div class="dots">'+STEPS.map((s,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')+'</div>'}
+function nextFact(){const un=F.filter(f=>!S.seen.includes(f.id));if(!un.length)return null;return un[Math.floor(Math.random()*un.length)]}
+function testDue(){return S.done>0&&S.done%5===0&&S.lastTestAt!==S.done&&S.testQ.length>0}
+function agla(){S.cur=null;save();go(testDue()?'test':'yatra')}
+function finishRound(){tick();S.done++;save()}
+
+function yatra(){
+  let R=S.cur;
+  if(!R){const f=nextFact();
+    if(!f)return view(`<div class="card"><h2>Saare observations dekh liye</h2><p class="mute">Khule Sawal mein chhode hue sawal hain, ya Asli Duniya mein apni reality pe andaaza lagao.</p>
+      <button class="btn" data-go="asli">Asli Duniya</button><button class="btn ghost" data-go="khule">Khule Sawal</button></div>`);
+    R=S.cur={fid:f.id,step:'notice'};save()}
+  const f=F[R.fid],set=(k,v,step)=>{R[k]=v;if(step)R.step=step;save();yatra()};
+  const head=`<span class="tag">${CAT[f.cat]}</span>`;
+  switch(R.step){
+  case 'notice':
+    return view(`<div class="card">${dots('notice')}${head}<div class="label">Notice karo</div><p class="obs">${f.obs}</p>
+      <button class="btn" id="n">Ajeeb hai. Aage</button></div>`,{n:()=>set('step','sawal')});
+  case 'sawal':
+    view(`<div class="card">${dots('sawal')}<div class="label">Tumhara sawal</div><p class="obs sm">${f.obs}</p>
+      <textarea id="qt" placeholder="Kyun... ya Kaise..." maxlength="200"></textarea>
+      <div class="err" id="qe"></div>
+      <details><summary>Example sawal</summary><ul>${f.ex.map(e=>'<li>'+e+'</li>').join('')}</ul></details>
+      <p class="hint">Kyun/Kaise se shuru, specific sawal = bonus XP</p>
+      <button class="btn" id="ok">Sawal pakka</button><button class="btn ghost" id="sk">Abhi sawal nahi</button></div>`,
+      {ok:()=>{const t=$('qt').value.trim();if(t.length<8||t.split(/\s+/).length<3){$('qe').textContent='Thoda poora sawal likho (kam se kam 3 words).';$('qt').classList.add('shake');setTimeout(()=>$('qt')&&$('qt').classList.remove('shake'),400);return}
+        const k=isKyun(t);S.st.ownQ++;if(k)S.st.kyunQ++;R.own=t;R.kyun=k;R.step='guess';gain(1,k?15:10,k?'kyun/kaise sawal':'apna sawal');yatra()},
+       sk:()=>set('step','guess')});
+    return;
+  case 'guess':
+    view(`<div class="card">${dots('guess')}<div class="label">Pehla guess</div><p class="obs sm">${f.obs}</p><p class="q">${f.q}</p>
+      ${f.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div>`);
+    app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>set('g1',+b.dataset.i,'yakeen'));return;
+  case 'yakeen':
+    sliderView('yakeen','Yakeen',`Tumhara guess: <b>${f.o[R.g1]}</b>`,'Kitna sure ho ki ye sahi hai?',0,100,R.conf==null?50:R.conf,'%',['Bilkul nahi','Pakka'],v=>v<35?'Kam yakeen':v<=65?'Beech mein':'Kaafi pakka',
+      v=>{R.conf=v;R.step=v>70?'doosra':'ichha';gain(0,5,'guess + yakeen');yatra()});return;
+  case 'doosra':
+    view(`<div class="card">${dots('doosra')}<div class="label">Doosra guess</div><p class="q">Agar ye galat hai, to aur kya ho sakta hai?</p>
+      <p class="mute small">Pehla: ${f.o[R.g1]} (${R.conf}%)</p>
+      ${f.o.map((o,i)=>i===R.g1?'':`<button class="opt" data-i="${i}">${o}</button>`).join('')}
+      <button class="btn ghost" id="sk">Kuch aur nahi soojha</button></div>`,{sk:()=>set('step','ichha')});
+    app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{R.g2=+b.dataset.i;R.step='ichha';gain(1,10,'doosra guess');yatra()});return;
+  case 'ichha':
+    sliderView('ichha','Ichha','<span class="mute">'+f.q+'</span>','Answer jaanne ki kitni ichha hai?',1,7,R.ichha||4,'',['Zara bhi nahi','Bahut zyada'],v=>['','Bilkul nahi','Kam','Thodi','Theek-thaak','Achhi','Kaafi','Bahut zyada'][v],
+      v=>set('ichha',v,'decide'));return;
+  case 'decide':{
+    const can=S.coins>=1;
+    view(`<div class="card">${dots('decide')}<div class="label">Faisla</div><p class="q">${f.q}</p>
+      <p class="small">Tumhara guess: <b>${f.o[R.g1]}</b> · ${R.conf}% yakeen${R.g2!=null?'<br>Doosra: '+f.o[R.g2]:''}</p>
+      <button class="btn" id="op" ${can?'':'disabled'}>Answer kholo · 1 coin</button>
+      ${can?'':'<p class="hint">Coins khatam. Asli Duniya ka check poora karke +2 coin milte hain.</p>'}
+      <button class="btn ghost" id="ch">Chhod do</button>
+      <p class="hint">Chhodne pe sawal Khule Sawal mein jaayega. Answer nahi dikhega.</p></div>`,
+      {op:()=>{if(S.coins<1)return;S.rounds.push({fid:f.id,c:R.conf,ich:R.ichha,op:true,d:today()});S.seen.push(f.id);gain(-1,0,'answer khola');finishRound();R.step='reveal';doReveal(R);yatra()},
+       ch:()=>{S.rounds.push({fid:f.id,c:R.conf,ich:R.ichha,op:false,d:today()});S.seen.push(f.id);S.khule.push({fid:f.id,g1:R.g1,conf:R.conf,g2:R.g2,own:R.own||'',d:today()});S.st.khuleTotal++;finishRound();checkBadges();S.cur=null;save();
+         view(`<div class="card"><div class="label">Khule Sawal mein save</div><h2>Sawal khula hai</h2><p class="mute">Answer nahi dikhaya. Jab chaho, 1 coin se khol sakte ho.</p>
+           <p class="small">"${esc(R.own||f.q)}"</p><button class="btn" id="ag">Agla observation</button><button class="btn ghost" data-go="home">Ghar</button></div>`,{ag:agla})}});
+    return;}
+  case 'reveal':{
+    const ok=R.ok;
+    view(`<div class="card">${dots('reveal')}<div class="label">Answer</div><p class="q">${f.q}</p>
+      ${f.o.map((o,i)=>{const c=i===f.a?'right':(i===R.g1||i===R.g2)?'wrong':'';const mk=[i===f.a?'Sahi':'',i===R.g1?'Pehla guess':'',i===R.g2?'Doosra guess':''].filter(Boolean).join(' · ');
+        return `<button class="opt ${c}" disabled>${mk?`<span class="mk">${mk}</span>`:''}${o}</button>`}).join('')}
+      <div class="box ${ok?'good':'warm'}"><b>${ok?'Sahi nikla.':R.g2===f.a?'Pehla galat, doosra sahi nikla.':'Galat nikla, ab ye yaad rahega.'}</b>${f.why}</div>
+      <div class="how"><b>Ye kaise pata chala</b>${f.how}</div>
+      <button class="btn" id="n">Aage: naya gap</button></div>`,{n:()=>set('step','gap')});return;}
+  case 'gap':{
+    const can=S.coins>=1;
+    view(`<div class="card">${dots('gap')}<div class="label">Naya gap</div><p class="obs">${f.fq}</p>
+      <button class="btn" id="cn" ${can?'':'disabled'}>Chain mein aage · 1 coin</button>
+      <button class="btn ghost" id="ag">Agla observation</button><button class="btn ghost" data-go="home">Ghar</button></div>`,
+      {cn:()=>{if(S.coins<1)return;gain(-1,0,'chain round');set('step','cguess')},ag:agla});return;}
+  case 'cguess':
+    view(`<div class="card"><span class="tag">Chain · ${CAT[f.cat]}</span><div class="label">Guess</div><p class="q">${f.fq}</p>
+      ${f.fo.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div>`);
+    app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>set('cg',+b.dataset.i,'cyakeen'));return;
+  case 'cyakeen':
+    sliderView(null,'Yakeen',`Guess: <b>${f.fo[R.cg]}</b>`,'Kitna yakeen?',0,100,50,'%',['Bilkul nahi','Pakka'],v=>v<35?'Kam yakeen':v<=65?'Beech mein':'Kaafi pakka',
+      v=>{R.cconf=v;R.step='creveal';const ok=R.cg===f.fa;R.cok=ok;S.guesses.push({c:v,ok});S.st.chain[f.cat]=(S.st.chain[f.cat]||0)+1;gain(0,20+(ok?5:0),ok?'chain round + sahi':'chain round');yatra()});return;
+  case 'creveal':
+    view(`<div class="card"><span class="tag">Chain · ${CAT[f.cat]}</span><div class="label">Answer</div><p class="q">${f.fq}</p>
+      ${f.fo.map((o,i)=>{const c=i===f.fa?'right':i===R.cg?'wrong':'';const mk=[i===f.fa?'Sahi':'',i===R.cg?'Tumhara guess':''].filter(Boolean).join(' · ');
+        return `<button class="opt ${c}" disabled>${mk?`<span class="mk">${mk}</span>`:''}${o}</button>`}).join('')}
+      <div class="box ${R.cok?'good':'warm'}"><b>${R.cok?'Sahi nikla.':'Galat nikla, ab ye yaad rahega.'}</b>${f.fwhy}</div>
+      <div class="how"><b>Ye kaise pata chala</b>${f.fhow}</div>
+      <p class="hint">${CAT[f.cat]} mein chain rounds: ${S.st.chain[f.cat]}</p>
+      <button class="btn" id="ag">Agla observation</button><button class="btn ghost" data-go="home">Ghar</button></div>`,{ag:agla});return;
+  }
+}
+function doReveal(R){if(R.revealed)return;const f=F[R.fid];const ok=R.g1===f.a;R.ok=ok;R.revealed=true;
+  S.guesses.push({c:R.conf,ok});
+  if(ok)gain(0,5,'sahi guess');
+  else{S.st.wrongOpen++;if(!S.testQ.includes(f.id))S.testQ.push(f.id);if(R.g2===f.a)S.st.doosraSahi++;gain(0,15,'galat ke baad khola')}
+  save()}
+
+function sliderView(step,label,ctx,ask,min,max,val,unit,ends,desc,done){
+  view(`<div class="card">${step?dots(step):''}<div class="label">${label}</div><p class="small">${ctx}</p><p class="q">${ask}</p>
+    <div class="big" id="sv">${val}${unit}</div><div class="big-sub" id="sd">${desc(val)}</div>
+    <input type="range" id="sr" min="${min}" max="${max}" step="1" value="${val}" aria-label="${label}">
+    <div class="ends"><span>${ends[0]}</span><span>${ends[1]}</span></div>
+    <button class="btn" id="sok">Ye theek hai</button></div>`);
+  const r=$('sr');r.oninput=()=>{$('sv').textContent=r.value+unit;$('sd').textContent=desc(+r.value)};
+  $('sok').onclick=()=>done(+r.value);
+}
+
+/* ============ YAAD TEST ============ */
+function test(){
+  if(!S.test){const pool=[...S.testQ].sort(()=>Math.random()-.5).slice(0,3);if(!pool.length){S.cur=null;return go('yatra')}
+    S.testQ=S.testQ.filter(id=>!pool.includes(id));S.test={items:pool,i:0,ans:null,right:0};S.lastTestAt=S.done;save()}
+  const T=S.test;
+  if(T.i>=T.items.length){const r=T.right,n=T.items.length;S.test=null;save();
+    return view(`<div class="card"><div class="label">Yaad Test</div><h2>${r} / ${n} yaad the</h2><p class="mute">Ye wo sawal the jahan pehle guess galat gaya tha.</p>
+      <button class="btn" id="ag">Agla observation</button><button class="btn ghost" data-go="home">Ghar</button></div>`,{ag:()=>{S.cur=null;go('yatra')}})}
+  const f=F[T.items[T.i]];
+  view(`<div class="card"><span class="tag">Yaad Test · ${T.i+1}/${T.items.length}</span><p class="obs sm">${f.obs}</p><p class="q">${f.q}</p>
+    ${f.o.map((o,i)=>{let c='';if(T.ans!=null){if(i===f.a)c='right';else if(i===T.ans)c='wrong'}return `<button class="opt ${c}" data-i="${i}" ${T.ans!=null?'disabled':''}>${o}</button>`}).join('')}
+    ${T.ans!=null?`<div class="box ${T.ans===f.a?'good':'warm'}"><b>${T.ans===f.a?'Yaad tha.':'Abhi bhi pakad mein nahi. Koi baat nahi.'}</b>${f.why}</div><button class="btn" id="nx">Aage</button>`:''}</div>`,
+    {nx:()=>{T.i++;T.ans=null;save();test()}});
+  if(T.ans==null)app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{T.ans=+b.dataset.i;if(T.ans===f.a){T.right++;gain(0,10,'yaad tha')}save();test()});
+}
+
+/* ============ KHULE SAWAL ============ */
+function khule(){
+  const busy=S.cur&&!['notice','reveal','gap','creveal'].includes(S.cur.step);
+  view(`<div class="card"><div class="label">Khule Sawal</div><h2>${S.khule.length?'Chhode hue sawal':'Abhi koi khula sawal nahi'}</h2>
+    <p class="mute small">${S.khule.length?'Answer abhi tak nahi dekha. Jo sach mein jaanna ho, 1 coin se kholo.':'Round mein "Chhod do" karoge to sawal yahan aayega.'}</p>
+    ${busy?'<p class="note">Pehle chal raha round poora karo.</p>':''}
+    ${S.khule.map((k,i)=>{const f=F[k.fid];return `<div class="item"><div class="meta">${nice(k.d)} · ${CAT[f.cat]}</div>
+      <p style="margin:4px 0 6px;font-weight:600">${f.obs}</p>${k.own?`<p class="small">Tumhara sawal: "${esc(k.own)}"</p>`:''}
+      <p class="small mute">Guess: ${f.o[k.g1]} · ${k.conf}%</p>
+      <button class="btn" data-k="${i}" ${S.coins<1||busy?'disabled':''}>Kholo · 1 coin</button></div>`}).join('')}
+    <button class="btn ghost" data-go="home">Ghar</button></div>`);
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{if(S.coins<1||busy)return;const k=S.khule.splice(+b.dataset.k,1)[0];
+    S.st.khuleOpened++;S.cur={fid:k.fid,step:'reveal',g1:k.g1,conf:k.conf,g2:k.g2,own:k.own,fromKhule:true};
+    const rr=S.rounds.find(r=>r.fid===k.fid);if(rr)rr.later=true;
+    gain(-1,0,'khula sawal khola');tick();doReveal(S.cur);go('yatra')});
+}
+
+/* ============ ASLI DUNIYA ============ */
+function asli(){
+  view(`<div class="card"><div class="label">Asli Duniya</div><h2>Apne aas-paas dekho</h2><p class="mute small">Dukaan, ghar, sadak, kaam. Kuch jo ajeeb laga.</p>
+    <div class="field"><label for="ao">Kya dekha?</label><textarea id="ao" placeholder="Jaise: Chai waale ki dukaan pe shaam 6 baje sabse zyada bheed hoti hai" maxlength="240"></textarea></div>
+    <div class="field"><label for="aq">Kyun / kaise?</label><input type="text" id="aq" placeholder="Kyun ... ?" maxlength="160"></div>
+    <div class="field"><label for="ag">Tumhara guess</label><input type="text" id="ag" placeholder="Shayad ..." maxlength="160"></div>
+    <div class="field"><label>Yakeen: <span id="acv">50%</span></label><input type="range" id="ac" min="0" max="100" value="50" aria-label="Yakeen"><div class="ends"><span>Bilkul nahi</span><span>Pakka</span></div></div>
+    <div class="field"><label for="ag2">Doosra guess <span class="mute small">(chahe to)</span></label><input type="text" id="ag2" placeholder="Agar ye galat hai to..." maxlength="160"></div>
+    <div class="err" id="ae"></div>
+    <button class="btn" id="as">Pending Check banao</button>
+    <p class="hint">Points tab milenge jab tum reality check karke wapas aaoge.</p>
+    <button class="btn ghost" data-go="home">Ghar</button></div>`,
+    {as:()=>{const o=$('ao').value.trim(),q=$('aq').value.trim(),g=$('ag').value.trim();
+      if(!o||!q||!g){$('ae').textContent='Dekha, sawal aur guess teeno chahiye.';return}
+      const k=isKyun(q);S.st.ownQ++;if(k)S.st.kyunQ++;
+      S.pending.push({id:S.nid++,d:today(),obs:o,q,g1:g,conf:+$('ac').value,g2:$('ag2').value.trim(),kyun:k});tick();checkBadges();save();
+      toast('Pending Check bana. Reality dekh ke wapas aao.');go('pending')}});
+  $('ac').oninput=e=>$('acv').textContent=e.target.value+'%';
+}
+function pending(){
+  view(`<div class="card"><div class="label">Pending Checks</div><h2>${S.pending.length?'Check hona baaki':'Koi pending check nahi'}</h2>
+    <p class="mute small">${S.pending.length?'Reality mein dekh ke likho kya nikla. Tabhi points milenge.':'Asli Duniya mein ek andaaza lagao.'}</p>
+    ${S.pending.map(p=>`<div class="item" id="p${p.id}"><div class="meta">${nice(p.d)} · ${daysAgo(p.d)}</div>
+      <p style="margin:4px 0;font-weight:600">${esc(p.obs)}</p><p class="small">${esc(p.q)}</p>
+      <p class="small mute">Guess: ${esc(p.g1)} · ${p.conf}%${p.g2?'<br>Doosra: '+esc(p.g2):''}</p>
+      <div id="pf${p.id}"><button class="btn" data-p="${p.id}">Check kiya</button></div></div>`).join('')}
+    ${S.pending.length?'':'<button class="btn" data-go="asli">Asli Duniya</button>'}
+    ${S.checked.length?`<div class="label" style="margin-top:20px">Check ho chuke</div>${S.checked.slice().reverse().map(c=>`<div class="item">
+      <div class="meta">${nice(c.cd)}</div><span class="chip ${c.m==='sahi'?'g':c.m==='galat'?'b':'w'}">${c.m==='sahi'?'Sahi':c.m==='galat'?'Galat':'Kuch aur hi'}</span>
+      <p style="margin:6px 0 2px;font-weight:600">${esc(c.q)}</p><p class="small mute">Guess: ${esc(c.g1)} · ${c.conf}%</p><p class="small">Nikla: ${esc(c.res)}</p></div>`).join('')}`:''}
+    <button class="btn ghost" data-go="home">Ghar</button></div>`);
+  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const id=+b.dataset.p;
+    $('pf'+id).innerHTML=`<div class="field" style="margin-top:10px"><label for="pr${id}">Reality mein kya nikla?</label><textarea id="pr${id}" maxlength="240"></textarea></div>
+      <div class="err" id="pe${id}"></div>
+      <div class="row"><button class="btn" data-m="sahi">Sahi</button><button class="btn warm" data-m="galat">Galat</button></div>
+      <button class="btn ghost" data-m="aur">Kuch aur hi nikla</button>`;
+    $('pr'+id).focus();
+    $('pf'+id).querySelectorAll('[data-m]').forEach(m=>m.onclick=()=>{const res=$('pr'+id).value.trim();if(res.length<3){$('pe'+id).textContent='Pehle likho kya nikla.';return}
+      const i=S.pending.findIndex(x=>x.id===id);if(i<0)return;const p=S.pending.splice(i,1)[0];
+      p.res=res;p.m=m.dataset.m;p.cd=today();S.checked.push(p);S.guesses.push({c:p.conf,ok:p.m==='sahi'});S.st.checks++;tick();
+      gain(2,30,'reality check');pending()})});
+}
+
+/* ============ MERA PATTERN ============ */
+function pattern(){
+  const R=S.rounds.filter(r=>r.c!=null&&r.ich!=null);
+  // scatter
+  const W=320,H=220,L=34,B=30,T=10,Rr=10,pw=W-L-Rr,ph=H-T-B;
+  const sx=c=>L+c/100*pw,sy=i=>T+ph-(i-1)/6*ph;
+  let sc=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Yakeen vs ichha scatter"><rect x="${sx(35)}" y="${T}" width="${sx(65)-sx(35)}" height="${ph}" fill="var(--acc2)"/>`;
+  for(let i=1;i<=7;i++)sc+=`<line x1="${L}" x2="${W-Rr}" y1="${sy(i)}" y2="${sy(i)}" stroke="var(--line)"/><text x="${L-8}" y="${sy(i)+4}" text-anchor="end">${i}</text>`;
+  [0,25,50,75,100].forEach(c=>sc+=`<text x="${sx(c)}" y="${H-12}" text-anchor="middle">${c}%</text>`);
+  R.forEach(r=>sc+=`<circle cx="${sx(r.c)}" cy="${sy(r.ich)}" r="6" fill="${r.op?'var(--acc)':'var(--card)'}" stroke="var(--acc)" stroke-width="2" fill-opacity="${r.op?.85:1}"/>`);
+  sc+=`<text x="${W-Rr}" y="${H-1}" text-anchor="end">Yakeen →</text><text transform="translate(9 ${T+ph/2}) rotate(-90)" text-anchor="middle">Ichha</text></svg>`;
+  // bars
+  const bk=[['Kam (<35%)',r=>r.c<35],['Beech (35-65%)',r=>r.c>=35&&r.c<=65],['Pakka (>65%)',r=>r.c>65]].map(([n,fn])=>{const a=R.filter(fn);return{n,cnt:a.length,avg:a.length?a.reduce((s,r)=>s+r.ich,0)/a.length:0}});
+  const mx=Math.max(...bk.map(b=>b.avg));
+  const bars=bk.map(b=>`<div style="margin:10px 0"><div class="small" style="display:flex;justify-content:space-between"><span>${b.n}</span><span class="mute">${b.cnt?b.avg.toFixed(1)+' / 7 · '+b.cnt+' sawal':'abhi data nahi'}</span></div>
+    <div class="bar" style="height:12px"><i style="width:${b.avg/7*100}%;background:${b.cnt&&b.avg===mx?'var(--acc)':'var(--mute)'};opacity:${b.cnt&&b.avg===mx?1:.45}"></i></div></div>`).join('');
+  // calibration
+  const G=S.guesses,cbk=[0,20,40,60,80].map(lo=>{const a=G.filter(g=>g.c>=lo&&(lo===80?g.c<=100:g.c<lo+20));return{lo,n:a.length,p:a.length?a.filter(g=>g.ok).length/a.length*100:null}});
+  const CW=320,CH=200,cl=34,cb=30,ct=10,cr=10,cpw=CW-cl-cr,cph=CH-ct-cb,bw=cpw/5;
+  let cs=`<svg viewBox="0 0 ${CW} ${CH}" role="img" aria-label="Calibration chart">`;
+  [0,50,100].forEach(v=>{const y=ct+cph-v/100*cph;cs+=`<line x1="${cl}" x2="${CW-cr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${cl-6}" y="${y+4}" text-anchor="end">${v}%</text>`});
+  cs+=`<line x1="${cl}" y1="${ct+cph}" x2="${CW-cr}" y2="${ct}" stroke="var(--warm)" stroke-dasharray="4 4"/>`;
+  cbk.forEach((b,i)=>{const x=cl+i*bw;if(b.p!=null){const h=b.p/100*cph;cs+=`<rect x="${x+6}" y="${ct+cph-h}" width="${bw-12}" height="${Math.max(h,1.5)}" rx="4" fill="var(--acc)"/>`;
+    cs+=`<text x="${x+bw/2}" y="${ct+cph-h-4}" text-anchor="middle">${Math.round(b.p)}%</text>`}
+    cs+=`<text x="${x+bw/2}" y="${CH-14}" text-anchor="middle">${b.lo}-${b.lo+20}</text><text x="${x+bw/2}" y="${CH-2}" text-anchor="middle">n=${b.n}</text>`});
+  cs+='</svg>';
+  const cbv=calib(),opened=R.filter(r=>r.op).length;
+  view(`<div class="card"><div class="label">Mera Pattern</div><h2>Yakeen aur ichha</h2>
+    ${R.length?sc+`<div class="legend"><span><i style="background:var(--acc)"></i>Answer khola</span><span><i style="border:2px solid var(--acc);width:8px;height:8px"></i>Chhoda</span><span><i style="background:var(--acc2);border-radius:2px"></i>Beech ka yakeen</span></div>`:'<p class="mute">Khoj Yatra ke kuch rounds khelo, yahan dots aayenge.</p>'}
+  </div>
+  <div class="card"><div class="label">Ichha kab sabse zyada?</div>${bars}<p class="hint">Average ichha (1-7), yakeen ke hisaab se. Sabse ooncha highlight hai.</p></div>
+  <div class="card"><div class="label">Calibration</div><h2>${cbv===null?'Abhi data nahi':'Score: '+cbv+' / 100'}</h2>
+    ${G.length?cs+'<p class="hint">Bar = us yakeen pe kitni baar sahi nikle. Dashed line = imaandaar yakeen.</p>':'<p class="mute small">Answer khologe ya reality check karoge, tab yahan aayega.</p>'}
+    ${overconf()?'<p class="note">Pakke guesses aksar galat nikle.</p>':''}</div>
+  <div class="card"><div class="label">Sawal</div><div class="stats">
+    <div class="stat"><div class="n">${S.st.ownQ}</div><div class="t">Khud banaye sawal</div></div>
+    <div class="stat"><div class="n">${S.st.kyunQ}</div><div class="t">Kyun/kaise wale</div></div>
+    <div class="stat"><div class="n">${opened}</div><div class="t">Answer khole</div></div>
+    <div class="stat"><div class="n">${R.length-opened}</div><div class="t">Chhode</div></div></div>
+    <button class="btn ghost" data-go="home">Ghar</button></div>`);
+}
+
+/* ============ BADGES ============ */
+function badges(){
+  view(`<div class="card"><div class="label">Badges</div><h2>${Object.keys(S.badges).length} / ${BADGES.length}</h2><p class="mute small">Locked badges ki shart chhupi hai.</p>
+    <div class="bgrid">${BADGES.map(([id,n,c],i)=>{const on=!!S.badges[id];return `<div class="badge ${on?'on':''}"><div class="ic">${on?'✓':'?'}</div><b>${n}</b><small>${on?c+'<br>'+nice(S.badges[id]):'???'}</small></div>`}).join('')}</div>
+    <button class="btn ghost" data-go="home">Ghar</button></div>`);
+}
+
+/* ============ SETTINGS ============ */
+function settings(){
+  view(`<div class="card"><div class="label">Settings</div><h2>Theme</h2>
+    <div class="row">${['auto','light','dark'].map(t=>`<button class="btn ${S.theme===t?'':'ghost'}" data-t="${t}">${t==='auto'?'Auto':t==='light'?'Light':'Dark'}</button>`).join('')}</div></div>
+    <div class="card"><h2>Sab reset karo</h2><p class="mute small">XP, coins, badges, sawal, checks: sab mit jaayega.</p>
+    <div id="rz"><button class="btn ghost" id="r1">Reset</button></div></div>
+    <button class="btn ghost" data-go="home">Ghar</button>`,
+    {r1:()=>{$('rz').innerHTML=`<div class="box bad"><b>Pakka? Ye wapas nahi aayega.</b></div><div class="row"><button class="btn ghost" id="rn">Nahi</button><button class="btn warm" id="ry">Haan, reset</button></div>`;
+      $('rn').onclick=settings;$('ry').onclick=()=>{const th=S.theme;S=fresh();S.theme=th;save();toast('Sab reset ho gaya');go('home')}}});
+  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{S.theme=b.dataset.t;save();applyTheme();settings()});
+}
+
+applyTheme();S.level=Math.max(S.level,levelOf(S.xp));topbar();go('home');
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+ "note": "Fact Factory ke topics. mode 1 = Khoj Yatra (general), mode 3 = Business Khoj. Ek batch mein max 20.",
+ "topics": [
+  {"name": "Honey", "mode": 1, "category": "khaana"},
+  {"name": "Octopus", "mode": 1, "category": "jaanwar"},
+  {"name": "Onion tears", "mode": 1, "category": "khaana"},
+  {"name": "Nirma", "mode": 3, "category": "pricing"},
+  {"name": "Amul", "mode": 3, "category": "ownership"},
+  {"name": "Parle-G", "mode": 3, "category": "pricing"},
+  {"name": "Maggi 2015 ban", "mode": 3, "category": "crisis"},
+  {"name": "Zomato Foodiebay", "mode": 3, "category": "pivot"},
+  {"name": "Chik shampoo sachet", "mode": 3, "category": "packaging"}
+ ]
+}

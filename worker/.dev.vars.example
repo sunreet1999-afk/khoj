@@ -1,0 +1,6 @@
+# Is file ko copy karke .dev.vars banao (sirf local `wrangler dev` ke liye).
+# .dev.vars git mein kabhi nahi jaati (.gitignore dekho). Asli keys yahan commit mat karo.
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+ACCESS_CODE=
+ADMIN_TOKEN=
