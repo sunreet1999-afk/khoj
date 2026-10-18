@@ -135,6 +135,13 @@ details ul{margin:0 0 6px;padding-left:20px}
 .ai-box{margin-top:10px;padding:12px 0 0;border-top:1px dashed var(--line);font-size:15px}
 .ai-box .cost,.cost{font-size:12px;color:var(--mute);margin-top:4px}
 .dots3{display:inline-flex;gap:4px;padding:10px 0}
+.mybox{margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.mybox .myq{font-weight:700;margin:6px 0 0}
+.mybox .ai-box{margin-top:8px;padding-top:8px}
+.mybox .ai-box .link{display:block;text-align:left;margin-top:6px;min-height:44px}
+.askrow{display:flex;gap:8px;margin-top:10px}
+.askrow input{flex:1;min-width:0;min-height:44px}
+.askrow .btn{width:auto;flex:none;padding:0 16px}
 .dots3 i{width:7px;height:7px;border-radius:50%;background:var(--mute);animation:d3 1s infinite ease-in-out}
 .dots3 i:nth-child(2){animation-delay:.15s}.dots3 i:nth-child(3){animation-delay:.3s}
 @keyframes d3{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
@@ -355,7 +362,7 @@ async function wfetch(path,opt={},ms=8000){const u=workerUrl();if(!u)throw new E
   try{const r=await fetch(u+path,{...opt,signal:ctrl.signal,headers:{'content-type':'application/json','x-access-code':S.settings.accessCode||'',...(opt.headers||{})}});let j=null;try{j=await r.json()}catch(e){}return{status:r.status,j:j||{}}}finally{clearTimeout(t)}}
 async function ai(path,body,ctx){
   if(!aiOn())return null;
-  if(ctx&&ctx.aiCalls>=3){toast('Is round mein AI ke 3 sawal ho gaye.');return null}
+  if(ctx&&ctx.aiCalls>=AI_ROUND_MAX){toast(`Is round mein AI ke ${AI_ROUND_MAX} sawal ho gaye.`);return null}
   try{const {status,j}=await wfetch(path,{method:'POST',body:JSON.stringify(body)});
     if(status===401){AI.ok=false;rerender();return null}
     if(j.cost&&j.cost.usd!=null){S.spend.push({t:Date.now(),p:j.cost.provider||'claude',usd:j.cost.usd});SESSION.usd+=j.cost.usd;SESSION.calls++;if(ctx){ctx.aiCalls=(ctx.aiCalls||0)+1;ctx.aiUsd=(ctx.aiUsd||0)+j.cost.usd}save()}
@@ -369,6 +376,31 @@ function aiButton(label,holder,run){if(!aiOn())return '';const id='ai'+Math.rand
     const html=await run();const h2=$(holder);if(!h2)return;
     if(html){h2.innerHTML='<div class="ai-box">'+html+'</div>';h2.querySelectorAll('[data-fill]').forEach(x=>x.onclick=()=>{const t=$(x.dataset.fill);if(t){t.value=x.dataset.v;t.dispatchEvent(new Event('input'))}})}else{h2.innerHTML='';b.remove()}}},0);
   return `<button class="link acc" id="${id}">${label}</button>`}
+// Player ke apne sawal pe AI: answer se pehle ishaara, answer ke baad seedha jawab aur aage chat.
+const AI_ROUND_MAX=6;const BUSY={};
+const cardCtx=c=>({observation:cut(c.observation),sahi_answer:cut(c.options[c.correct]),explanation:cut(c.explanation)});
+const costOf=usd=>usd!=null?`<div class="cost">Is jawab ka kharcha: ${rs(usd)}</div>`:'';
+function hintHtml(R){if(!R.own)return '';const h=R.hint,busy=BUSY[R.cid+'h'];
+  return `<div class="mybox" id="hintbox"><div class="label">Tumhara sawal</div><p class="myq">"${esc(R.own)}"</p>${h&&h.t?`<div class="ai-box"><b>AI ka ishaara:</b> ${esc(h.t)}${h.s?`<p style="margin:6px 0 0"><i>${esc(h.s)}</i></p>`:''}${costOf(h.usd)}</div>`:busy?'<div class="dots3" aria-label="Soch raha hai"><i></i><i></i><i></i></div>':`<p class="small mute" style="margin:6px 0 0">Har option ko apne sawal se milao: kaunsa tumhare sawal ka sabse achha jawab deta hai? Answer khulne pe tumhare sawal ka jawab bhi milega.</p>`}</div>`}
+async function getHint(R,c){if(!R.own||R.hint||BUSY[R.cid+'h']||!aiOn())return;BUSY[R.cid+'h']=1;
+  const j=await ai('/ishaara',{observation:cut(c.observation),question:cut(c.question),options:cut(c.options.join(' | ')),sawal:cut(R.own),sahi_answer:cut(c.options[c.correct])},R);delete BUSY[R.cid+'h'];
+  R.hint=j&&j.ishaara?{t:j.ishaara,s:j.socho||'',usd:j.cost&&j.cost.usd}:{none:1};save();const b=$('hintbox');if(b)b.outerHTML=hintHtml(R)}
+function chatHtml(R){const L=R.chat||[],busy=BUSY[R.cid+'c'];const can=aiOn()&&(R.aiCalls||0)<AI_ROUND_MAX&&!busy;
+  if(!L.length&&!can)return '';
+  return `<div class="mybox" id="chatbox"><div class="label">${R.own?'Tumhare sawal ka jawab':'Is answer pe kuch poochhna hai?'}</div>
+    ${L.map(x=>`<p class="myq">"${esc(x.q)}"</p>${x.a?`<div class="ai-box">${x.card===false?'<span class="small mute">Card ke bahar ki baat</span><br>':''}${esc(x.a)}${x.next&&can?`<button class="link acc" data-ask="${esc(x.next)}">Poochho: ${esc(x.next)}</button>`:''}${costOf(x.usd)}</div>`:x.err?'<p class="small mute">AI abhi jawab nahi de paya.</p>':''}`).join('')}
+    ${busy?'<div class="dots3" aria-label="Soch raha hai"><i></i><i></i><i></i></div>':''}
+    ${can?`<div class="askrow"><label class="sr" for="askq">Aur poochho</label><input type="text" id="askq" maxlength="200" placeholder="${L.length?'Aur poochho: kyun / kaise...':'Kyun / kaise...'}"><button class="btn sm" id="askb">Poochho</button></div>`:''}</div>`}
+function drawChat(R,c){const b=$('chatbox');if(b)b.outerHTML=chatHtml(R)||'<div id="chatbox"></div>';bindChat(R,c)}
+function bindChat(R,c){const go_=()=>{const t=$('askq');if(t)ask(R,c,t.value,true)};const b=$('askb');if(b)b.onclick=go_;
+  const t=$('askq');if(t)t.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go_()}};
+  document.querySelectorAll('#chatbox [data-ask]').forEach(x=>x.onclick=()=>ask(R,c,x.dataset.ask,true))}
+async function ask(R,c,q,extra){q=String(q||'').trim();if(q.length<5||BUSY[R.cid+'c'])return;R.chat=R.chat||[];
+  const prev=R.chat.slice(-2).map(x=>`Q: ${x.q} A: ${x.a||''}`).join(' | ');const item={q};R.chat.push(item);BUSY[R.cid+'c']=1;buzz(10);drawChat(R,c);
+  if(extra){S.st.ownQ++;addMyQ(q,R.mode===3?'m3':'m1',R.qref||'');if(isKyun(q)){S.st.kyunQ++;gain(0,5,'aage ka sawal')}}
+  const j=await ai('/jawab',{...cardCtx(c),sawal:cut(q),pichhli_baat:cut(prev)},R);delete BUSY[R.cid+'c'];
+  if(j&&j.jawab){item.a=j.jawab;item.card=j.card_mein;item.next=j.agla_sawal||'';item.usd=j.cost&&j.cost.usd}else item.err=1;
+  save();drawChat(R,c);const t=$('askq');if(t&&extra)t.focus()}
 const costLine=j=>j&&j.cost?`<div class="cost">Is jawab ka kharcha: ${rs(j.cost.usd)}</div>`:'';
 function aiFeedback(obsFn,qId,holder,ctx){return aiButton('Feedback lo (AI)',holder,async()=>{const q=($(qId)||{}).value||'';if(q.trim().length<5)return null;
   const j=await ai('/feedback-sawal',{observation:cut(obsFn()),sawal:cut(q)},ctx);if(!j||!j.feedback)return null;
@@ -463,17 +495,17 @@ function round(m){
       <details><summary>Example sawal</summary><ul>${(c.example_sawal||[]).map(e=>'<li>'+esc(e)+'</li>').join('')}</ul></details>
       ${aiFeedback(()=>c.observation,'qt','aib',R)}<div id="aib"></div>${guide('sawal')}</div>`,
       {ok:()=>{const t=$('qt').value.trim();if(t.length<8||t.split(/\s+/).length<3){$('qe').textContent='Thoda poora sawal likho (kam se kam 3 words).';return}
-        const k=isKyun(t);S.st.ownQ++;if(k)S.st.kyunQ++;R.own=t;R.qref='r'+S.nid;addMyQ(t,m===3?'m3':'m1',R.qref);R.step='guess';gain(1,k?15:10,k?'kyun/kaise sawal':'apna sawal');round(m)},
+        const k=isKyun(t);S.st.ownQ++;if(k)S.st.kyunQ++;R.own=t;R.qref='r'+S.nid;addMyQ(t,m===3?'m3':'m1',R.qref);R.step='guess';gain(1,k?15:10,k?'kyun/kaise sawal':'apna sawal');round(m);getHint(R,c)},
        sk:()=>set('step','guess')},`<button class="btn" id="ok">Sawal pakka</button><button class="link" id="sk">Abhi sawal nahi</button>`);
     document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{buzz(10);const t=$('qt');t.value=b.dataset.st+' ';t.focus();t.setSelectionRange(t.value.length,t.value.length)});return fin();
   case 'guess':
-    view(D('guess')+cardHtml(true)+`<div class="step"><p class="q">${esc(c.question)}</p>${c.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}${guide('guess')}</div>`);
+    view(D('guess')+cardHtml(true)+hintHtml(R)+`<div class="step"><p class="q">${esc(c.question)}</p>${c.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}${guide('guess')}</div>`);
     document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{buzz(12);set('g1',+b.dataset.i,'yakeen')});return fin();
   case 'yakeen':
-    view(D('yakeen')+cardHtml(true)+`<div class="step"><p class="small mute">Tumhara guess: <b>${esc(c.options[R.g1])}</b></p><p class="q">Kitna sure ho?</p>${chips5('yk',YK)}${guide('yakeen')}</div>`);
+    view(D('yakeen')+cardHtml(true)+hintHtml(R)+`<div class="step"><p class="small mute">Tumhara guess: <b>${esc(c.options[R.g1])}</b></p><p class="q">Kitna sure ho?</p>${chips5('yk',YK)}${guide('yakeen')}</div>`);
     bindChips('yk',v=>{R.conf=v;R.step=v>70?'doosra':'ichha';gain(0,5,'guess + yakeen');setTimeout(()=>round(m),160)});return fin();
   case 'doosra':
-    view(D('doosra')+cardHtml(true)+`<div class="step"><p class="q">Agar ye galat hai, to aur kya ho sakta hai?</p><p class="mute small">Pehla: ${esc(c.options[R.g1])} · ${R.conf}%</p>
+    view(D('doosra')+cardHtml(true)+hintHtml(R)+`<div class="step"><p class="q">Agar ye galat hai, to aur kya ho sakta hai?</p><p class="mute small">Pehla: ${esc(c.options[R.g1])} · ${R.conf}%</p>
       ${c.options.map((o,i)=>i===R.g1?'':`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}${guide('doosra')}</div>`,{sk:()=>set('step','ichha')},`<button class="link" id="sk">Kuch aur nahi soojha</button>`);
     document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{buzz(12);R.g2=+b.dataset.i;R.step='ichha';gain(1,10,'doosra guess');round(m)});return fin();
   case 'ichha':
@@ -481,7 +513,7 @@ function round(m){
     bindChips('ik',v=>setTimeout(()=>set('ichha',v,'decide'),160));return fin();
   case 'decide':{
     const can=S.coins>=1;
-    view(D('decide')+cardHtml(true)+`<div class="step"><p class="q">${esc(c.question)}</p><p class="small">Tumhara guess: <b>${esc(c.options[R.g1])}</b> · ${R.conf}%${R.g2!=null?'<br>Doosra: '+esc(c.options[R.g2]):''}</p>
+    view(D('decide')+cardHtml(true)+hintHtml(R)+`<div class="step"><p class="q">${esc(c.question)}</p><p class="small">Tumhara guess: <b>${esc(c.options[R.g1])}</b> · ${R.conf}%${R.g2!=null?'<br>Doosra: '+esc(c.options[R.g2]):''}</p>
       ${can?'':'<p class="note">Coins khatam. Asli Duniya ya Mera Business ka check poora karne pe +2 coin milte hain.</p>'}${guide('decide')}</div>`,
       {op:()=>openAnswer(R,c,m),ch:()=>chhodo(R,c,m)},`<button class="btn" id="op" ${can?'':'disabled'}>Answer kholo · 1 coin</button><button class="link" id="ch">Chhod do (Khule Sawal mein)</button>`);return fin();}
   case 'reveal':{
@@ -490,7 +522,8 @@ function round(m){
     view(D('reveal')+cardHtml(false,back,!anim,ok?'pop':'glow')+`<div class="step">
       <p>${esc(c.explanation)}</p>
       <details><summary>Saare options</summary>${c.options.map((o,i)=>{const cl=i===c.correct?'right':(i===R.g1||i===R.g2)?'wrong':'';const mk=[i===c.correct?'Sahi':'',i===R.g1?'Pehla guess':'',i===R.g2?'Doosra':''].filter(Boolean).join(' · ');return `<button class="opt ${cl}" disabled>${mk?`<span class="mk">${mk}</span>`:''}${esc(o)}</button>`}).join('')}</details>
-      ${srcHtml(c.source,c.source_url,c.saal)}${guide('reveal')}</div>`,{n:()=>set('step',m===3?'tbs':'gap')},`<button class="btn" id="n">Aage</button>`);
+      ${srcHtml(c.source,c.source_url,c.saal)}${chatHtml(R)}${guide('reveal')}</div>`,{n:()=>set('step',m===3?'tbs':'gap')},`<button class="btn" id="n">Aage</button>`);
+    bindChat(R,c);if(R.own&&!R.chat&&aiOn())setTimeout(()=>ask(R,c,R.own,false),anim?650:0);
     if(anim){setTimeout(()=>{const x=$('rcin');if(x)x.classList.add('flipped')},40);buzz(20);tone('ding')}
     return fin();}
   case 'tbs':

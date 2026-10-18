@@ -1,5 +1,5 @@
 // Khoj service worker. Naya version deploy karo to VERSION badlo, purana cache apne aap hat jaata hai.
-const VERSION = 'khoj-v3.0.2';
+const VERSION = 'khoj-v3.1.0';
 const CORE = ['./', './index.html', './facts.json', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './sample/SAMPLE_nakli_restaurant_sales.csv'];
 
 self.addEventListener('install', (e) => {
